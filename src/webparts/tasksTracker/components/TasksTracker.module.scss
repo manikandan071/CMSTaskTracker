@@ -1,0 +1,87 @@
+.headerSection{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.loaderSection {
+    height: 551px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mobileView {
+    display: none; // default hidden
+}
+.taskTableWrapper{
+    margin-top: 10px;
+    height: calc(66vh - 100px);
+    overflow-y: auto;
+}
+
+.card {
+    background: #f9f9f9;
+    // border: 1px solid #ddd;
+    margin: 10px 0px 15px 0px;
+    padding: 16px;
+    border-radius: 15px;
+    // box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+    box-shadow: #007bff33 0px 25px 20px -20px;
+}
+
+.cardHeader {
+    h3{
+        margin: 0px 0px 10px 0px ;
+        font-size: 15px;
+        color: #4f2674;
+    }
+}
+.cardContent{
+    p{
+        margin: 6px 0;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 400;
+    }
+    .cardProgress{
+        padding-top: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        span{
+            font-size: 13px;
+        }
+    }
+}
+ .mobilePaginator {
+     display: none;
+ }
+
+// 🔁 Responsive Rules
+@media screen and (max-width: 768px) {
+    .desktopView {
+        display: none;
+    }
+    .mobilePaginator{
+        display: block;
+    }
+    .noDataFound {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        color: #403555;
+        font-weight: 500;
+    }
+    .mobileView {
+        display: block;
+        height: calc(91vh - 100px);
+        overflow-y: auto;
+    }
+    .fullmobileView{
+        display: block;
+        height: calc(100vh - 100px);
+        overflow-y: auto;
+    }
+}

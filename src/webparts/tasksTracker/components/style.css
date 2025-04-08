@@ -1,0 +1,239 @@
+.p-dialog-header{
+    display: none !important;
+}
+.p-dialog{
+    width: 65vw!important;
+    top: 25px !important;;
+    right: 15px!important;
+}
+.p-dialog .p-dialog-content{
+   padding: 5px!important;
+}
+.taskTableContainer{
+    width: 100%;
+    padding: 20px!important;
+    background-color: #f0f5ff;
+}
+.description-body{
+    display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        /* Limit to 3 lines */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 340px;
+        /* Optional: limit width */
+        line-height: 1.4em;
+        /* Adjust line spacing */
+        max-height: calc(1.4em * 3);
+        margin: 0px;
+}
+.taskTable .p-datatable-table{
+    width: 100%;
+    border: 1px solid #dee2e6;
+    /* border-bottom: 0px; */
+}
+.taskTable .p-datatable-thead>tr>th{
+    border: 0px;
+    color: #323130;
+    font-size: 13px;
+    font-weight: 600;
+}
+.taskTable .p-datatable-thead>tr>th{
+    font-size: 14px;
+color: #fff;
+background-color: #6c757dfc;
+}
+.taskTable .p-datatable-tbody>tr>td{
+    font-size: 13px;
+}
+.headerSection .p-button-icon{
+    font-size: 0.7rem !important;
+}
+.p-dropdown-panel{
+    background-color: #e9f5ff;
+    border: 1px solid #e9f5ff !important;
+}
+.p-dropdown-panel .p-dropdown-items{
+    padding: 0px !important;
+}
+.p-dropdown-panel .p-focus{
+    background-color: #c0d7ee;
+}
+.inputsection .p-inputtext,.inputsection .p-dropdown, .inputsection .p-calendar, .inputsection .p-fileupload{
+    width: 100% !important;
+}
+.inputsection .p-component:focus{
+    box-shadow: none !important;
+    border-color: #6c87a1 !important;
+}
+.inputsection .p-focus{
+    box-shadow: none !important;
+    border-color: #6c87a1 !important;
+}
+.inputsection .p-focus .p-inputtext{
+    box-shadow: none !important;
+    border-color: #6c87a1 !important;
+}
+.ms-BasePicker{
+    width: 100% !important;
+}
+.ms-BasePicker-text{
+    padding: 5px !important;
+    border: 1px solid #ced4da !important;
+    min-height: 50px !important;
+    max-height: 103px !important;
+    overflow-x: hidden !important;
+
+}
+.ms-BasePicker-text::after{
+    border: 1px solid #6c87a1 !important;
+}
+.viewOnly .ms-BasePicker-text::after {
+    border: none!important;
+}
+.inputsection .p-fileupload .p-fileupload-buttonbar{
+    padding: 10px!important;
+}
+.inputsection .p-fileupload .p-fileupload-buttonbar button{
+    display: none !important;
+}
+.inputsection .p-fileupload .p-fileupload-buttonbar .p-fileupload-choose {
+    height: 28px;
+    font-size: 13px;
+    line-height: 1px;
+}
+.inputsection .p-fileupload .p-fileupload-buttonbar .p-fileupload-choose svg{
+    width: 10px!important;
+}
+.inputsection .p-fileupload .p-progressbar{
+    display: none !important;
+}
+.inputsection .p-fileupload .p-fileupload-content{
+    overflow: auto;
+    height: 117px;
+    padding: 10px !important;
+}
+.inputsection .p-fileupload .p-fileupload-content .p-fileupload-row{
+    width: 100%;
+}
+.inputsection .p-fileupload .p-fileupload-content .p-fileupload-row > div{
+    font-size: 13px;
+    padding: 0px 10px !important;
+}
+.inputsection .p-fileupload .p-fileupload-content .p-fileupload-row > div :first-of-type{
+    width: 70%;
+}
+
+
+/* searchbox style */
+.searchBox .p-component:focus {
+    box-shadow: none !important;
+    border-color: #6c87a1 !important;
+}
+@media (min-width: 768px){
+    .searchBox{
+        width: 300px!important;
+    }
+    .searchBox .p-inputtext{
+        width: 100%;
+    }
+}
+
+
+
+/* Pagination styles */
+
+/* .p-paginator-bottom .p-link{
+    border-radius: 50px!important;
+    margin: 3px !important;
+}
+.p-paginator-bottom .p-dropdown{
+    display: none !important;
+} */
+.p-paginator .p-link{
+    border-radius: 50px!important;
+    margin: 3px !important;
+}
+.p-paginator .p-dropdown{
+    display: none !important;
+}
+.p-paginator{
+    background-color: #f0f5ff !important;
+    padding: 0px;
+    padding-top: 20px!important;
+}
+.mobilePaginationSec .p-paginator .p-paginator-current{
+    border: none !important;
+    background-color: #f0f5ff !important;
+}
+
+
+/* check-box style */
+
+.ms-ChoiceFieldGroup-flexContainer{
+    display: flex!important;
+    gap: 20px!important;
+}
+.ms-ChoiceFieldGroup{
+    width: 100% !important;
+}
+.ms-ChoiceField-wrapper{
+    width: 100% !important;
+}
+.ms-ChoiceField-field{
+    font-weight: 400 !important;
+    font-size: 13px !important;
+}
+.is-checked{
+    color: #0078d4!important;
+    font-weight: 600!important;
+    font-size: 13px!important;
+}
+.is-checked::before{
+    border: 1px solid #0078d4!important;
+}
+.is-checked::after{
+    border: 1px solid #0078d4 !important;
+    background-color: #0078d4 !important;
+}
+
+
+/* Date picker styles */
+.ms-DatePicker{
+    /* height: 33px !important; */
+    margin: 0px !important;
+    width: 100% !important;
+}
+.ms-TextField-fieldGroup{
+    border: 1px solid #cfd5db !important;
+}
+.ms-TextField-fieldGroup::after{
+    border: 1px solid #6c87a1 !important;
+}
+
+/* error style */
+.errormsg{
+    display: none !important;
+}
+.error .errormsg{
+    display: block !important;
+    color: #d13438 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    margin-top: 5px !important;
+}
+.noterror{
+    margin-bottom: 21px !important;
+}
+
+/* toast message styles */
+.p-toast{
+    top: 25px !important;
+    right: 25px !important;
+    width: 80% !important;
+}
+.p-toast .p-toast-message-content{
+    align-items: center !important;
+}
