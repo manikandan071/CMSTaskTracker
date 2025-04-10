@@ -62,8 +62,10 @@ interface formDataDetails {
   DueDate?: any;
   Id?: any;
   AssignedTo?: any[];
+  AssignedBy?: any[];
   TaskType?: string;
   isValid?: boolean;
+  recOwner?: boolean;
 }
 interface TaskFormProps {
   webPartProps: any;
@@ -165,12 +167,28 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
   const handleFileUpload = (event: any) => {
     const files = Array.from(event.target.files);
+    const existingFileNames = images.map((img: any) => img.name.toLowerCase());
 
-    if (files.length > 0) {
-      const newImages = files.map((file: any) => ({
-        id: file.name + Date.now(), // Unique ID
+    // Filter out duplicate files
+    const newFiles = files.filter((file: any) => {
+      const isDuplicate = existingFileNames.includes(file.name.toLowerCase());
+      if (isDuplicate) {
+        toast.current &&
+          toast.current.show({
+            severity: "warn",
+            summary: "Warning",
+            detail: `File ${file.name} is already uploaded.`,
+            life: 3000,
+          });
+      }
+      return !isDuplicate; // Only return non-duplicate files
+    });
+
+    if (newFiles.length > 0) {
+      const newImages = newFiles.map((file: any) => ({
+        id: file.name + Date.now(),
         url: URL.createObjectURL(file),
-        file: file, // Store actual file
+        file: file,
         name: file.name,
       }));
 
@@ -327,6 +345,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
       return;
     }
     try {
+      const user = await listWeb.currentUser.get();
       setDialogLoader(true);
       const userIds: any[] = [];
       await Promise.all(
@@ -367,11 +386,18 @@ const TaskForm: React.FC<TaskFormProps> = ({
           CemeteryLocationId: formData?.CemeteryLocationId,
           GroupName: formData?.GroupName,
           AssignedTo: formData?.AssignedTo,
+          AssignedBy: [
+            {
+              text: user?.Title,
+              secondaryText: user?.Email,
+            },
+          ],
           Priority: formData?.Priority,
           Progress: formData?.Progress,
           StartDate: formData?.StartDate,
           DueDate: formData?.DueDate,
           Notes: formData?.Notes,
+          recOwner: true,
         };
         setAllTasksList((obj: any) => {
           return [...obj, tempObject].sort((a: any, b: any) => b.Id - a.Id);
@@ -423,11 +449,13 @@ const TaskForm: React.FC<TaskFormProps> = ({
               CemeteryLocationId: formData?.CemeteryLocationId,
               GroupName: formData?.GroupName,
               AssignedTo: formData?.AssignedTo,
+              AssignedBy: formData?.AssignedBy,
               Priority: formData?.Priority,
               Progress: formData?.Progress,
               StartDate: formData?.StartDate,
               DueDate: formData?.DueDate,
               Notes: formData?.Notes,
+              recOwner: formData?.recOwner,
             };
             setAllTasksList((prevTasks: any) =>
               prevTasks
@@ -519,6 +547,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
     }
   }, [initialData?.Id, initialData?.GroupName]);
 
+  const capitalizeFirstLetter = (str: string): string => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
   return (
     <div>
       <Toast ref={toast} />
@@ -538,6 +571,16 @@ const TaskForm: React.FC<TaskFormProps> = ({
               setImagePreview={setImagePreview}
             />
           )}
+          <div className={styles.formHeader}>
+            <h2>
+              {formData?.TaskType === "New"
+                ? "New"
+                : formData?.TaskType === "View"
+                ? "View"
+                : "Edit"}{" "}
+              Task
+            </h2>
+          </div>
           <div
             className={`${imagePreview ? styles.hideSection : ""} ${
               styles.dialogContainer
@@ -557,9 +600,15 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   Task Title *
                 </label>
                 <InputText
-                  disabled={formData?.TaskType === "View" ? true : false}
+                  disabled={
+                    formData?.TaskType === "View" || !formData?.recOwner
+                      ? true
+                      : false
+                  }
                   value={formData?.Title}
-                  onChange={(e) => formOnChange(e.target.value, "Title")}
+                  onChange={(e) =>
+                    formOnChange(capitalizeFirstLetter(e.target.value), "Title")
+                  }
                   id="taskTitle"
                   aria-describedby="username-help"
                   placeholder="Enter here"
@@ -575,12 +624,21 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   Description
                 </label>
                 <InputTextarea
-                  disabled={formData?.TaskType === "View" ? true : false}
+                  disabled={
+                    formData?.TaskType === "View" || !formData?.recOwner
+                      ? true
+                      : false
+                  }
                   value={formData?.Description}
-                  onChange={(e) => formOnChange(e.target.value, "Description")}
+                  onChange={(e) =>
+                    formOnChange(
+                      capitalizeFirstLetter(e.target.value),
+                      "Description"
+                    )
+                  }
                   id="description"
                   placeholder="Enter here"
-                  rows={4}
+                  rows={3}
                   cols={30}
                   style={{
                     resize: "none",
@@ -604,7 +662,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   Cemetery Location *
                 </label>
                 <Dropdown
-                  disabled={formData?.TaskType === "View" ? true : false}
+                  disabled={
+                    formData?.TaskType === "View" || !formData?.recOwner
+                      ? true
+                      : false
+                  }
                   id="location"
                   value={formData?.CemeteryLocation}
                   onChange={(e) => formOnChange(e.value, "CemeteryLocation")}
@@ -632,7 +694,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   Assign To *
                 </label>
                 <NormalPeoplePicker
-                  disabled={formData?.TaskType === "View" ? true : false}
+                  disabled={
+                    formData?.TaskType === "View" || !formData?.recOwner
+                      ? true
+                      : false
+                  }
                   onResolveSuggestions={onFilterChanged}
                   getTextFromItem={(item) => item.text || ""}
                   pickerSuggestionsProps={{
@@ -662,8 +728,17 @@ const TaskForm: React.FC<TaskFormProps> = ({
                     Start Date *
                   </label>
                   <DatePicker
-                    disabled={formData?.TaskType === "View" ? true : false}
+                    disabled={
+                      formData?.TaskType === "View" || !formData?.recOwner
+                        ? true
+                        : false
+                    }
                     minDate={new Date()}
+                    maxDate={
+                      formData?.DueDate
+                        ? new Date(formData?.DueDate)
+                        : undefined
+                    }
                     componentRef={datePickerRef}
                     allowTextInput
                     ariaLabel="Select a date. Input format is day slash month slash year."
@@ -693,7 +768,8 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   <DatePicker
                     disabled={
                       formData?.TaskType === "View" ||
-                      formData?.StartDate === ""
+                      formData?.StartDate === "" ||
+                      !formData?.recOwner
                         ? true
                         : false
                     }
@@ -721,7 +797,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 </label>
                 {formData?.Priority && (
                   <ChoiceGroup
-                    disabled={formData?.TaskType === "View" ? true : false}
+                    disabled={
+                      formData?.TaskType === "View" || !formData?.recOwner
+                        ? true
+                        : false
+                    }
                     // defaultSelectedKey={formData?.Priority}
                     selectedKey={formData?.Priority}
                     options={priorityOptions}
@@ -759,7 +839,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   disabled={formData?.TaskType === "View" ? true : false}
                   autoResize
                   value={formData?.Notes}
-                  onChange={(e) => formOnChange(e.target.value, "Notes")}
+                  onChange={(e) =>
+                    formOnChange(capitalizeFirstLetter(e.target.value), "Notes")
+                  }
                   id="notes"
                   placeholder="Enter here"
                   rows={5}
@@ -767,7 +849,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 />
               </div>
             </div>
-            <div className={styles.fullDectionWrapper}>
+            <div className={styles.fullSectionWrapper}>
               <div className={`inputsection ${styles.sectionControl}`}>
                 <div className={styles.attachmentUploader}>
                   <div className={styles.attachmentsBtnSection}>
@@ -797,77 +879,79 @@ const TaskForm: React.FC<TaskFormProps> = ({
                       ></i>
                     )}
                   </div>
-                  {images?.length > 0 && (
-                    <div
-                      className={
-                        formData?.TaskType === "View"
-                          ? styles.viewImageList
-                          : styles.imageList
-                      }
-                    >
-                      {images.map((img, index) => (
-                        <div key={index} className={styles.imageCard}>
-                          <div className={styles.imgPreview}>
-                            <img
-                              src={img.url}
-                              alt={img.name}
-                              onClick={() => {
-                                setImagePreview(true);
-                                setPreviewImageIndex(index);
-                              }}
-                            />
-                            {formData?.TaskType !== "View" && (
-                              <button
-                                className={styles.deleteBtn}
-                                onClick={() => handleRemoveImage(index)}
+                  <div
+                    className={
+                      formData?.TaskType === "View"
+                        ? styles.viewImageList
+                        : styles.imageList
+                    }
+                  >
+                    {images.map((img, index) => (
+                      <div key={index} className={styles.imageCard}>
+                        <div className={styles.imgPreview}>
+                          <img
+                            src={img.url}
+                            alt={img.name}
+                            onClick={() => {
+                              setImagePreview(true);
+                              setPreviewImageIndex(index);
+                            }}
+                          />
+                          {formData?.TaskType !== "View" && (
+                            <button
+                              className={styles.deleteBtn}
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                height="16"
+                                width="16"
+                                viewBox="0 0 24 24"
+                                fill="white"
                               >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  height="16"
-                                  width="16"
-                                  viewBox="0 0 24 24"
-                                  fill="white"
-                                >
-                                  <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                          <div title={img.name} className={styles.imageName}>
-                            {img.name}
-                          </div>
+                                <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
+                              </svg>
+                            </button>
+                          )}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <div title={img.name} className={styles.imageName}>
+                          {img.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className={styles.footerSection}>
+                    <Button
+                      disabled={dialogLoader}
+                      label="Close"
+                      severity="secondary"
+                      icon="pi pi-times"
+                      onClick={() => {
+                        setImages([]);
+                        setOpenForm(false);
+                      }}
+                      className="p-button-text"
+                      size="small"
+                    />
+                    {formData?.TaskType !== "View" && (
+                      <Button
+                        severity="secondary"
+                        disabled={dialogLoader}
+                        label={
+                          formData?.TaskType === "New" ? "Submit" : "Update"
+                        }
+                        icon="pi pi-check"
+                        onClick={() =>
+                          taskSubmissionFunction(
+                            formData?.TaskType === "New" ? true : false
+                          )
+                        }
+                        size="small"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className={styles.footerSection}>
-              <Button
-                disabled={dialogLoader}
-                label="Close"
-                icon="pi pi-times"
-                onClick={() => {
-                  setImages([]);
-                  setOpenForm(false);
-                }}
-                className="p-button-text"
-                size="small"
-              />
-              {formData?.TaskType !== "View" && (
-                <Button
-                  disabled={dialogLoader}
-                  label={formData?.TaskType === "New" ? "Submit" : "Update"}
-                  icon="pi pi-check"
-                  onClick={() =>
-                    taskSubmissionFunction(
-                      formData?.TaskType === "New" ? true : false
-                    )
-                  }
-                  size="small"
-                />
-              )}
             </div>
           </div>
         </>

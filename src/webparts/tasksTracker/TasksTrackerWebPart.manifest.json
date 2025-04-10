@@ -25,11 +25,12 @@
         "default": "Advanced"
       },
       "title": {
-        "default": "tasksTracker"
+        "default": "Task tracker"
       },
       "description": {
-        "default": "tasksTracker description"
+        "default": "Tasks tracker description"
       },
+      "iconImageUrl": "../../images/web-test.png",
       "officeFabricIconFontName": "Page",
       "properties": {
         "description": "tasksTracker"
