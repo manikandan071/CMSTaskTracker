@@ -85,7 +85,9 @@ background-color: #6c757dfc;
     min-height: 50px !important;
     max-height: 103px !important;
     overflow-x: hidden !important;
-
+}
+.ms-BasePicker-text input{
+    color: #000!important;
 }
 .ms-BasePicker-text::after{
     border: 1px solid #6c87a1 !important;
@@ -127,18 +129,53 @@ background-color: #6c757dfc;
 }
 
 
-/* searchbox style */
-.searchBox .p-component:focus {
+/* filter Section style */
+
+.searchBox{
+    display: flex;
+    gap: 20px;
+}
+
+.searchBox .p-focus, .filterContent .p-focus{
     box-shadow: none !important;
     border-color: #6c87a1 !important;
 }
-@media (min-width: 768px){
-    .searchBox{
-        width: 300px!important;
+.searchBox .p-component:focus, .filterContent .p-component:focus{
+    box-shadow: none !important;
+    border-color: #6c87a1 !important;
+}
+.searchBox .p-dropdown {
+    width: 200px;
+}
+.searchBox .p-dropdown .p-dropdown-label{
+    padding: 5px 15px;
+    font-size: 14px;
+}
+.p-dropdown-panel .p-dropdown-items .p-highlight{
+    background: #6e777f;
+}
+.filterMobileView{
+    display: none;
+}
+@media (max-width: 768px){
+    .filterMobileView{
+        display: flex;
     }
-    .searchBox .p-inputtext{
+    .searchBox{
+        display: none;
+    }
+    .filterContent{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .filterContent .p-component{
         width: 100%;
     }
+        .filterContent .p-dropdown-items{
+            height: 115px;
+            overflow: auto!important;
+        }
 }
 
 
@@ -155,6 +192,12 @@ background-color: #6c757dfc;
 .p-paginator .p-link{
     border-radius: 50px!important;
     margin: 3px !important;
+    color: #6e777f;
+}
+.p-paginator .p-highlight{
+    background-color: #6e777f;
+    border: 1px solid #6e777f;
+    color: #fff;
 }
 .p-paginator .p-dropdown{
     display: none !important;
@@ -171,7 +214,9 @@ background-color: #6c757dfc;
 
 
 /* check-box style */
-
+.ms-ChoiceField{
+    margin: 0px !important;
+}
 .ms-ChoiceFieldGroup-flexContainer{
     display: flex!important;
     gap: 20px!important;
@@ -186,17 +231,25 @@ background-color: #6c757dfc;
     font-weight: 400 !important;
     font-size: 13px !important;
 }
-.is-checked{
-    color: #0078d4!important;
+.ms-ChoiceField-field .ms-ChoiceFieldLabel {
+    color: #000;
+}
+.is-checked .ms-ChoiceFieldLabel{
+    color: #6c87a1!important;
     font-weight: 600!important;
     font-size: 13px!important;
 }
+.ms-ChoiceField-field::before{
+    background-color: #fff!important;
+    border-color: #6c87a1 !important;
+}
 .is-checked::before{
-    border: 1px solid #0078d4!important;
+    border: 1px solid #6c87a1!important;
+    background-color: #fff!important;
 }
 .is-checked::after{
-    border: 1px solid #0078d4 !important;
-    background-color: #0078d4 !important;
+    border: 1px solid #6c87a1 !important;
+    background-color: #6c87a1 !important;
 }
 
 
@@ -208,6 +261,11 @@ background-color: #6c757dfc;
 }
 .ms-TextField-fieldGroup{
     border: 1px solid #cfd5db !important;
+    background-color: #fff;
+}
+.ms-TextField-fieldGroup input{
+    background-color: #fff;
+    color: #000;
 }
 .ms-TextField-fieldGroup::after{
     border: 1px solid #6c87a1 !important;
@@ -236,4 +294,24 @@ background-color: #6c757dfc;
 }
 .p-toast .p-toast-message-content{
     align-items: center !important;
+}
+
+
+
+/*MultiPeoplePicker Common Styles..........................................*/
+.user-selector-group .ms-Image {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.displayText {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-selector-group .ms-Persona {
+    min-width: 0px;
+    width: 24px;
 }

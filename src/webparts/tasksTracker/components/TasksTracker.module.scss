@@ -15,8 +15,33 @@
 }
 .taskTableWrapper{
     margin-top: 10px;
-    height: calc(66vh - 100px);
-    overflow-y: auto;
+    // height: calc(87vh - 100px);
+    // overflow-y: auto;
+    .customTableHeader{
+        display: flex;
+        width: "100%";
+        background: #6e777f;
+        font-weight: 500;
+        color: #fff;
+        border-radius: 5px 5px 0px 0px;
+        div{
+            padding: 0px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+    .customTable{
+        height: calc(80vh - 100px);
+        overflow-y: auto;
+        border-radius: 0px 0px 10px 10px;
+        .tableRow{
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            border-bottom: 1px solid #6e777f26;
+        }
+    }
 }
 
 .card {
@@ -58,6 +83,13 @@
  .mobilePaginator {
      display: none;
  }
+ .noDataFound {
+     display: flex;
+     justify-content: center;
+     margin-top: 20px;
+     color: #403555;
+     font-weight: 500;
+ }
 
 // 🔁 Responsive Rules
 @media screen and (max-width: 768px) {
@@ -83,5 +115,21 @@
         display: block;
         height: calc(100vh - 100px);
         overflow-y: auto;
+    }
+}
+
+.Persona {
+    width: 30px;
+    height: 30px;
+    background-color: #0a1b39;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 13px;
+
+    .AllPersona {
+        visibility: visible;
     }
 }
