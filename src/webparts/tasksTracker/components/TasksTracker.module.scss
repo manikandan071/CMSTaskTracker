@@ -1,7 +1,11 @@
+$tablet-min: 770px;
+$tablet-max: 1024px;
+
 .headerSection{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 5px;
 }
 .loaderSection {
     height: 551px !important;
@@ -19,7 +23,7 @@
     // overflow-y: auto;
     .customTableHeader{
         display: flex;
-        width: "100%";
+        width: 100%!important;
         background: #6e777f;
         font-weight: 500;
         color: #fff;
@@ -29,6 +33,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            p{
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+
+            }
         }
     }
     .customTable{
@@ -40,6 +51,22 @@
             align-items: center;
             background-color: #fff;
             border-bottom: 1px solid #6e777f26;
+            .taskTitle{
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                line-clamp: 3;
+                /* Limit to 3 lines */
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin: 10px 0px;
+                padding: 0px 15px;
+
+            }
+            div div{
+                display: flex;
+                align-items: center;
+            }
         }
     }
 }
@@ -69,6 +96,9 @@
         align-items: center;
         gap: 10px;
         font-weight: 400;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .cardProgress{
         padding-top: 8px;
@@ -92,7 +122,7 @@
  }
 
 // 🔁 Responsive Rules
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 770px) {
     .desktopView {
         display: none;
     }
@@ -132,4 +162,46 @@
     .AllPersona {
         visibility: visible;
     }
+}
+
+
+
+@media screen and (min-width: 770px) and (max-width: 1380px) {
+   .tabletView{
+    display: none!important;
+   }
+}
+@media screen and (min-width: 770px) and (max-width: 1380px) {
+   .customTableHeader{
+   font-size: 13px;
+   }
+   .tableRow{
+   font-size: 13px;
+   }
+   .progressColumn{
+    width: 15%!important;
+   }
+}
+@media screen and (min-width: 770px) and (max-width: 1005px) {
+   .tableRow div span{
+    font-size: 12px;
+    display: block;
+    overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+   }
+   .width15{
+    width: 15%!important;
+   }
+}
+
+@media screen and (max-width: 494px) {
+    .headerSection {
+           margin: 15px 0px;
+        }
+                 .mobileView {
+                     display: block;
+                     height: calc(90vh - 100px);
+                     overflow-y: auto;
+                 }
 }

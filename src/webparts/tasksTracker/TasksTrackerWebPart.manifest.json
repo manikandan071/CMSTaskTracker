@@ -17,6 +17,7 @@
     "TeamsTab",
     "SharePointFullPage"
   ],
+  "canUpdateConfiguration": true,
   "supportsThemeVariants": true,
   "preconfiguredEntries": [
     {

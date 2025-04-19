@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import * as React from "react";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
@@ -14,7 +15,7 @@ import {
   IDatePicker,
   mergeStyleSets,
   defaultDatePickerStrings,
-  ChoiceGroup,
+  // ChoiceGroup,
 } from "@fluentui/react";
 import { Panel } from "@fluentui/react";
 import { useEffect, useRef, useState } from "react";
@@ -27,6 +28,8 @@ import Webcam from "react-webcam";
 import styles from "./TaskForm.module.scss";
 import PreviewImages from "../PreviewImages/PreViewImages";
 import { Toast } from "primereact/toast";
+import { app, media } from "@microsoft/teams-js";
+import CustomLoader from "../CustomLoader/CustomLoader";
 
 interface taskDetails {
   Title: string;
@@ -75,6 +78,7 @@ interface TaskFormProps {
     React.SetStateAction<taskDetails[] | undefined>
   >;
   setOpenForm: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowToast: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({
@@ -83,8 +87,12 @@ const TaskForm: React.FC<TaskFormProps> = ({
   userCemeteryList,
   setAllTasksList,
   setOpenForm,
+  setShowToast,
 }) => {
-  //   const listWeb = Web("https://chandrudemo.sharepoint.com/sites/testXML14");
+  // development site
+  // const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
+
+  // production site
   const listWeb = Web(
     "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
   );
@@ -121,6 +129,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
     { text: string; secondaryText: string }[]
   >([]);
   const [images, setImages] = useState<any[]>([]);
+  const [isInTeams, setIsInTeams] = useState(true);
+
+  console.log("formData", formData);
 
   const onFilterChanged = (filterText: string) => {
     return filterText
@@ -244,9 +255,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
           .getClient()
           .then(async (client: any) => {
             const groups = await getAllGroups(client);
+
             // setAdGroupsList([...groups]);
-            groups.forEach((group) => {
-              if (group.displayName === value?.GroupName) {
+            groups.forEach((group: any) => {
+              if (group.displayName.trim() === value?.GroupName.trim()) {
                 graph.groups
                   .getById(group?.id)
                   .members.get()
@@ -344,9 +356,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
     if (!isValid) {
       return;
     }
+    setDialogLoader(true);
     try {
       const user = await listWeb.currentUser.get();
-      setDialogLoader(true);
       const userIds: any[] = [];
       await Promise.all(
         (formData?.AssignedTo || []).map(async (user: any) => {
@@ -398,13 +410,20 @@ const TaskForm: React.FC<TaskFormProps> = ({
           DueDate: formData?.DueDate,
           Notes: formData?.Notes,
           recOwner: true,
+          isAttachment: images?.length > 0 ? true : false,
         };
+        setDialogLoader(false);
         setAllTasksList((obj: any) => {
           return [...obj, tempObject].sort((a: any, b: any) => b.Id - a.Id);
         });
-        setDialogLoader(false);
         setOpenForm(false);
         setImages([]);
+        setShowToast({
+          severity: "success",
+          summary: "Success",
+          detail: `The task has been added successfully.`,
+          life: 3000,
+        });
       } else {
         listWeb.lists
           .getByTitle("AllTasks")
@@ -456,7 +475,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
               DueDate: formData?.DueDate,
               Notes: formData?.Notes,
               recOwner: formData?.recOwner,
+              isAttachment: images?.length > 0 ? true : false,
             };
+            setDialogLoader(false);
             setAllTasksList((prevTasks: any) =>
               prevTasks
                 .map((task: any) =>
@@ -464,9 +485,14 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 )
                 .sort((a: any, b: any) => b.Id - a.Id)
             );
-            setDialogLoader(false);
             setOpenForm(false);
             setImages([]);
+            setShowToast({
+              severity: "success",
+              summary: "Success",
+              detail: "The task has been updated successfully.",
+              life: 3000,
+            });
           })
           .catch((err: any) => {
             console.log("Error : ", err);
@@ -547,9 +573,116 @@ const TaskForm: React.FC<TaskFormProps> = ({
     }
   }, [initialData?.Id, initialData?.GroupName]);
 
+  useEffect(() => {
+    if (window.parent !== window) {
+      app.initialize().then(() => {
+        app.getContext().then((context) => {
+          // Ready to use media
+          setIsInTeams(true);
+        });
+      });
+    }
+  }, []);
+
   const capitalizeFirstLetter = (str: string): string => {
     if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
+  const getPriorityBGColor = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case "critical":
+        return "#e74c3c";
+      case "high":
+        return "#e67e22";
+      case "low":
+        return "#2ecc71";
+      case "medium":
+        return "#3498db";
+      default:
+        return "#fff";
+    }
+  };
+  const getProgressBGColor = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case "not started":
+        return "#e67e22";
+      case "in progress":
+        return "#ffff00a3";
+      case "completed":
+        return "#2ecc71";
+      default:
+        return "#fff";
+    }
+  };
+  const getPriorityBorderColor = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case "critical":
+        return "#e74c3c";
+      case "high":
+        return "#e67e22";
+      case "low":
+        return "#2ecc71";
+      case "medium":
+        return "#3498db";
+      default:
+        return "#6e6f86";
+    }
+  };
+  const getProgressBorderColor = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case "not started":
+        return "#e67e22";
+      case "in progress":
+        return "#ffff00a3";
+      case "completed":
+        return "#2ecc71";
+      default:
+        return "#6e6f86";
+    }
+  };
+  const getProgressColor = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case "not started":
+        return "#fff";
+      case "in progress":
+        return "#000";
+      case "completed":
+        return "#fff";
+      default:
+        return "#6e6f86";
+    }
+  };
+
+  const handleUploadClick = () => {
+    if (isInTeams) {
+      // Use Teams SDK to open camera
+      media.selectMedia(
+        {
+          mediaType: media.MediaType.Image,
+          maxMediaCount: 1,
+          imageProps: {
+            sources: [media.Source.Camera],
+            startMode: media.CameraStartMode.Photo,
+          },
+        },
+        (err, files) => {
+          if (err) {
+            console.error("Media capture failed:", err);
+          } else if (files && files.length > 0) {
+            const file = files[0];
+            const byteArray = Uint8Array.from(atob(file.content), (c) =>
+              c.charCodeAt(0)
+            );
+            const blob = new Blob([byteArray], { type: file.mimeType });
+            console.log("blob", blob);
+          }
+        }
+      );
+    } else {
+      // Use normal file input in browser
+      fileInputRef.current?.click();
+    }
   };
 
   return (
@@ -557,10 +690,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
       <Toast ref={toast} />
       {dialogLoader ? (
         <div className={styles.dialogLoader}>
-          <i
+          {/* <i
             className="pi pi-spin pi-spinner"
             style={{ fontSize: "2rem", color: "#6c87a1" }}
-          ></i>
+          /> */}
+          <CustomLoader />
         </div>
       ) : (
         <>
@@ -577,9 +711,17 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 ? "New"
                 : formData?.TaskType === "View"
                 ? "View"
-                : "Edit"}{" "}
+                : "Edit"}
               Task
             </h2>
+            <i
+              className="pi pi-times"
+              style={{ fontSize: "1.0rem", cursor: "pointer" }}
+              onClick={() => {
+                setImages([]);
+                setOpenForm(false);
+              }}
+            />
           </div>
           <div
             className={`${imagePreview ? styles.hideSection : ""} ${
@@ -597,7 +739,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 }`}
               >
                 <label className={styles.sectionLabel} htmlFor="taskTitle">
-                  Task Title *
+                  Task Title <span style={{ color: "red" }}>*</span>
                 </label>
                 <InputText
                   disabled={
@@ -607,7 +749,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   }
                   value={formData?.Title}
                   onChange={(e) =>
-                    formOnChange(capitalizeFirstLetter(e.target.value), "Title")
+                    formOnChange(
+                      capitalizeFirstLetter(e.target.value.trimStart()),
+                      "Title"
+                    )
                   }
                   id="taskTitle"
                   aria-describedby="username-help"
@@ -632,7 +777,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   value={formData?.Description}
                   onChange={(e) =>
                     formOnChange(
-                      capitalizeFirstLetter(e.target.value),
+                      capitalizeFirstLetter(e.target.value.trimStart()),
                       "Description"
                     )
                   }
@@ -659,7 +804,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 }`}
               >
                 <label className={styles.sectionLabel} htmlFor="location">
-                  Cemetery Location *
+                  Cemetery Location <span style={{ color: "red" }}>*</span>
                 </label>
                 <Dropdown
                   disabled={
@@ -691,7 +836,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 }`}
               >
                 <label className={styles.sectionLabel} htmlFor="assignTo">
-                  Assign To *
+                  Assign To <span style={{ color: "red" }}>*</span>
                 </label>
                 <NormalPeoplePicker
                   disabled={
@@ -725,7 +870,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   }`}
                 >
                   <label className={styles.sectionLabel} htmlFor="startdate">
-                    Start Date *
+                    Start Date <span style={{ color: "red" }}>*</span>
                   </label>
                   <DatePicker
                     disabled={
@@ -743,9 +888,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
                     allowTextInput
                     ariaLabel="Select a date. Input format is day slash month slash year."
                     value={formData?.StartDate}
-                    onSelectDate={(date?: Date) =>
-                      formOnChange(date, "StartDate")
-                    }
+                    onSelectDate={(date?: Date) => {
+                      date && formOnChange(date, "StartDate");
+                    }}
                     formatDate={onFormatDate}
                     parseDateFromString={onParseDateFromString}
                     className={datePickerStyles.control}
@@ -763,7 +908,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   }`}
                 >
                   <label className={styles.sectionLabel} htmlFor="duedate">
-                    Due Date *
+                    Due Date <span style={{ color: "red" }}>*</span>
                   </label>
                   <DatePicker
                     disabled={
@@ -773,14 +918,14 @@ const TaskForm: React.FC<TaskFormProps> = ({
                         ? true
                         : false
                     }
-                    minDate={new Date()}
+                    minDate={new Date(formData?.StartDate) || new Date()}
                     componentRef={datePickerRef}
                     allowTextInput
                     ariaLabel="Select a date. Input format is day slash month slash year."
                     value={formData?.DueDate}
-                    onSelectDate={(date?: Date) =>
-                      formOnChange(date, "DueDate")
-                    }
+                    onSelectDate={(date?: Date) => {
+                      date && formOnChange(date, "DueDate");
+                    }}
                     formatDate={onFormatDate}
                     parseDateFromString={onParseDateFromString}
                     className={datePickerStyles.control}
@@ -795,7 +940,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 <label className={styles.sectionLabel} htmlFor="priority">
                   Priority
                 </label>
-                {formData?.Priority && (
+                {/* {formData?.Priority && (
                   <ChoiceGroup
                     disabled={
                       formData?.TaskType === "View" || !formData?.recOwner
@@ -809,14 +954,84 @@ const TaskForm: React.FC<TaskFormProps> = ({
                       formOnChange(option?.key, "Priority")
                     }
                   />
-                )}
+                )} */}
+                <div
+                  style={{ display: "flex", gap: "10px", marginBottom: "10px" }}
+                >
+                  {priorityOptions?.map((option: any, index: number) => {
+                    return (
+                      <div
+                        key={index}
+                        className="optionSection"
+                        style={{
+                          cursor:
+                            formData?.TaskType !== "View" && formData?.recOwner
+                              ? "pointer"
+                              : "not-allowed",
+                          backgroundColor: getPriorityBGColor(
+                            formData?.Priority === option?.key
+                              ? option?.key
+                              : "none"
+                          ),
+                          border: `1px solid ${getPriorityBorderColor(
+                            formData?.Priority === option?.key
+                              ? option?.key
+                              : "none"
+                          )}`,
+                          padding: "2px 10px 4px 10px",
+                          borderRadius: "50px",
+                          color:
+                            formData?.Priority === option?.key
+                              ? "#fff"
+                              : "#6e6f86",
+                          boxShadow:
+                            formData?.Priority === option?.key
+                              ? "rgba(0, 0, 0, 0.35) 0px -50px 36px -28px inset"
+                              : "",
+                        }}
+                        onClick={() =>
+                          formData?.TaskType !== "View" &&
+                          formData?.recOwner &&
+                          formOnChange(option?.key, "Priority")
+                        }
+                      >
+                        {option?.key === "Critical" ? (
+                          <i
+                            className="pi pi-info-circle"
+                            style={{ fontSize: "0.8rem", marginRight: "7px" }}
+                          />
+                        ) : option?.key === "High" ? (
+                          <i
+                            className="pi pi-arrow-up"
+                            style={{ fontSize: "0.8rem", marginRight: "7px" }}
+                          />
+                        ) : option?.key === "Low" ? (
+                          <i
+                            className="pi pi-arrow-down"
+                            style={{ fontSize: "0.8rem", marginRight: "7px" }}
+                          />
+                        ) : (
+                          <></>
+                        )}
+                        <span
+                          style={{
+                            fontWeight:
+                              formData?.Priority === option?.key ? 500 : 400,
+                          }}
+                        >
+                          {option?.key}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
               {formData?.TaskType !== "New" && (
                 <div className={`inputsection ${styles.sectionControl}`}>
                   <label className={styles.sectionLabel} htmlFor="progress">
                     Progress
                   </label>
-                  {formData?.Progress && (
+                  {/* {formData?.Progress && (
                     <ChoiceGroup
                       disabled={formData?.TaskType === "Edit" ? false : true}
                       selectedKey={formData?.Progress}
@@ -826,7 +1041,85 @@ const TaskForm: React.FC<TaskFormProps> = ({
                         formOnChange(option?.key, "Progress");
                       }}
                     />
-                  )}
+                  )} */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    {progressOptions?.map((option: any, index: number) => {
+                      return (
+                        <div
+                          key={index}
+                          className="optionSection"
+                          style={{
+                            cursor:
+                              formData?.TaskType !== "View"
+                                ? "pointer"
+                                : "not-allowed",
+                            backgroundColor: getProgressBGColor(
+                              formData?.Progress === option?.key
+                                ? option?.key
+                                : "none"
+                            ),
+                            border: `1px solid ${getProgressBorderColor(
+                              formData?.Progress === option?.key
+                                ? option?.key
+                                : "none"
+                            )}`,
+                            color: `${getProgressColor(
+                              formData?.Progress === option?.key
+                                ? option?.key
+                                : "none"
+                            )}`,
+                            padding: "2px 10px 4px 10px",
+                            borderRadius: "50px",
+                            boxShadow:
+                              formData?.Progress === option?.key
+                                ? "rgba(0, 0, 0, 0.35) 0px -50px 36px -28px inset"
+                                : "",
+                          }}
+                          onClick={() =>
+                            formData?.TaskType !== "View" &&
+                            formOnChange(option?.key, "Progress")
+                          }
+                        >
+                          {option?.key.toLowerCase() === "not started" ? (
+                            <i
+                              className="pi pi-ban"
+                              style={{ fontSize: "0.8rem", marginRight: "7px" }}
+                            />
+                          ) : option?.key.toLowerCase() === "in progress" ? (
+                            <i
+                              className={`pi ${
+                                formData?.Progress === option?.key
+                                  ? "pi-spin"
+                                  : ""
+                              } pi-spinner`}
+                              style={{ fontSize: "0.8rem", marginRight: "7px" }}
+                            />
+                          ) : option?.key.toLowerCase() === "completed" ? (
+                            <i
+                              className="pi pi-check-circle"
+                              style={{ fontSize: "0.8rem", marginRight: "7px" }}
+                            />
+                          ) : (
+                            <></>
+                          )}
+                          <span
+                            style={{
+                              fontWeight:
+                                formData?.Progress === option?.key ? 500 : 400,
+                            }}
+                          >
+                            {option?.key}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -840,7 +1133,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   autoResize
                   value={formData?.Notes}
                   onChange={(e) =>
-                    formOnChange(capitalizeFirstLetter(e.target.value), "Notes")
+                    formOnChange(
+                      capitalizeFirstLetter(e.target.value.trimStart()),
+                      "Notes"
+                    )
                   }
                   id="notes"
                   placeholder="Enter here"
@@ -874,54 +1170,70 @@ const TaskForm: React.FC<TaskFormProps> = ({
                     {formData?.TaskType !== "View" && (
                       <i
                         className="pi pi-camera"
-                        style={{ color: "slateblue", fontSize: "1.5rem" }}
+                        style={{
+                          color: "slateblue",
+                          fontSize: "1.5rem",
+                          display: "none",
+                        }}
                         onClick={() => setShowCamera(true)}
-                      ></i>
+                      />
                     )}
+                    <button
+                      style={{ display: "none" }}
+                      type="button"
+                      onClick={handleUploadClick}
+                    >
+                      Upload Image
+                    </button>
                   </div>
-                  <div
-                    className={
-                      formData?.TaskType === "View"
-                        ? styles.viewImageList
-                        : styles.imageList
-                    }
-                  >
-                    {images.map((img, index) => (
-                      <div key={index} className={styles.imageCard}>
-                        <div className={styles.imgPreview}>
-                          <img
-                            src={img.url}
-                            alt={img.name}
-                            onClick={() => {
-                              setImagePreview(true);
-                              setPreviewImageIndex(index);
-                            }}
-                          />
-                          {formData?.TaskType !== "View" && (
-                            <button
-                              className={styles.deleteBtn}
-                              onClick={() => handleRemoveImage(index)}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                height="16"
-                                width="16"
-                                viewBox="0 0 24 24"
-                                fill="white"
+                  {images?.length > 0 ? (
+                    <div
+                      className={`${
+                        formData?.TaskType === "View"
+                          ? styles.viewImageList
+                          : styles.imageList
+                      } imageList-section`}
+                    >
+                      {images.map((img, index) => (
+                        <div key={index} className={styles.imageCard}>
+                          <div className={styles.imgPreview}>
+                            <img
+                              src={img.url}
+                              alt={img.name}
+                              onClick={() => {
+                                setImagePreview(true);
+                                setPreviewImageIndex(index);
+                              }}
+                            />
+                            {formData?.TaskType !== "View" && (
+                              <button
+                                className={styles.deleteBtn}
+                                onClick={() => handleRemoveImage(index)}
                               >
-                                <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
-                              </svg>
-                            </button>
-                          )}
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  height="16"
+                                  width="16"
+                                  viewBox="0 0 24 24"
+                                  fill="white"
+                                >
+                                  <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                          <div title={img.name} className={styles.imageName}>
+                            {img.name}
+                          </div>
                         </div>
-                        <div title={img.name} className={styles.imageName}>
-                          {img.name}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className={styles.footerSection}>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="imageList-section" />
+                  )}
+                  <div className={`${styles.footerSection} formFooter-section`}>
                     <Button
+                      style={{ border: "1px solid #6c757d" }}
                       disabled={dialogLoader}
                       label="Close"
                       severity="secondary"
