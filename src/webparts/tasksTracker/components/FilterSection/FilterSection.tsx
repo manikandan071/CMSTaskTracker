@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import * as React from "react";
 import { useState } from "react";
-import { Panel, PanelType } from "@fluentui/react";
+import { Dialog } from "primereact/dialog";
+// import { Panel, PanelType } from "@fluentui/react";
 
 interface taskDetails {
   Title: string;
@@ -174,9 +176,16 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             cursor: "pointer",
           }}
           onClick={() => serachQueryFunction("", "Clear")}
-        ></i>
+        />
       </div>
       <div className="filterMobileView">
+        <InputText
+          style={{ width: "240px" }}
+          value={searchQueries?.text}
+          type="text"
+          placeholder="Search"
+          onChange={(e) => serachQueryFunction(e.target.value, "text")}
+        />
         <i
           className="pi pi-bars"
           style={{
@@ -189,9 +198,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             cursor: "pointer",
           }}
           onClick={() => setIsFilterPanelOpen(true)}
-        ></i>
+        />
       </div>
-      <Panel
+      {/* <Panel
         isOpen={isFilterPanelOpen}
         onDismiss={() => setIsFilterPanelOpen(false)}
         isLightDismiss
@@ -208,17 +217,37 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             maxWidth: "100vw",
             backgroundColor: "#fff",
             borderRadius: "0",
+            overflowY: "auto", // 👈 important!
+            WebkitOverflowScrolling: "touch", // 👈 smoother mobile scroll
           },
         }}
+      > */}
+      <Dialog
+        header="Header"
+        visible={isFilterPanelOpen}
+        position={"top"}
+        style={{ width: "100vw" }}
+        onHide={() => {
+          if (!isFilterPanelOpen) return;
+          setIsFilterPanelOpen(false);
+        }}
+        draggable={false}
+        resizable={false}
+        closeOnEscape={true}
+        dismissableMask
       >
-        <div className="filterContent">
+        <div
+          className="filterContent"
+          style={{ overflowY: "auto", maxHeight: "100%" }}
+        >
           <Dropdown
             value={searchQueries?.location}
             onChange={(e) => serachQueryFunction(e.value, "location")}
             options={userCemeteryList}
             optionLabel="text"
             placeholder="Location"
-            appendTo="self"
+            // appendTo="self"
+            appendTo={document.body}
           />
           <Dropdown
             value={searchQueries?.priority}
@@ -226,7 +255,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             options={priorityOptions}
             optionLabel="name"
             placeholder="Priority"
-            appendTo="self"
+            // appendTo="self"
+            appendTo={document.body}
           />
           <Dropdown
             value={searchQueries?.progress}
@@ -234,14 +264,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             options={progressOptions}
             optionLabel="name"
             placeholder="Progress"
-            appendTo="self"
+            // appendTo="self"
+            appendTo={document.body}
           />
-          <InputText
-            value={searchQueries?.text}
-            type="text"
-            placeholder="Search"
-            onChange={(e) => serachQueryFunction(e.target.value, "text")}
-          />
+
           <i
             className="pi pi-refresh"
             style={{
@@ -255,7 +281,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               marginTop: "10px",
             }}
             onClick={() => serachQueryFunction("", "Clear")}
-          ></i>
+          />
           <i
             className="pi pi-times"
             style={{
@@ -267,9 +293,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               color: "#788da9",
             }}
             onClick={() => setIsFilterPanelOpen(false)}
-          ></i>
+          />
         </div>
-      </Panel>
+      </Dialog>
+      {/* </Panel> */}
     </div>
   );
 };

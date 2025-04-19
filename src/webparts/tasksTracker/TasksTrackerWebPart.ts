@@ -42,7 +42,6 @@ export default class TasksTrackerWebPart extends BaseClientSideWebPart<ITasksTra
 
     await super.onInit();
   }
-
   // private _isDarkTheme: boolean = false;
   // private _environmentMessage: string = "";
 

@@ -1,0 +1,72 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.16",
+    "id": "62420fed-801a-407c-8196-dec8d4b5acaa",
+    "version": "8.0.7",
+    "developer": {
+        "name": "Cemetery Management",
+        "websiteUrl": "https://admin.teams.microsoft.com/policies/manage-apps/d6862e0e-0986-4fe7-a8d4-3d05bb59de87",
+        "privacyUrl": "https://admin.teams.microsoft.com/policies/manage-apps/d6862e0e-0986-4fe7-a8d4-3d05bb59de87",
+        "termsOfUseUrl": "https://admin.teams.microsoft.com/policies/manage-apps/d6862e0e-0986-4fe7-a8d4-3d05bb59de87",
+        "mpnId": "12345"
+    },
+    "name": {
+        "full": "Task tracker",
+        "short": "Task tracker"
+    },
+    "description": {
+        "short": "Task tracker",
+        "full": "Task tracker"
+    },
+    "icons": {
+        "outline": "62420fed-801a-407c-8196-dec8d4b5acaa_outline.png",
+        "color": "62420fed-801a-407c-8196-dec8d4b5acaa_color.png"
+    },
+    "accentColor": "#d8d8d8",
+    "configurableTabs": [
+        {
+            "configurationUrl": "https://{teamSiteDomain}{teamSitePath}/_layouts/15/TeamsLogon.aspx?SPFX=true&dest={teamSitePath}/_layouts/15/teamshostedapp.aspx%3FopenPropertyPane=true%26teams%26componentId=62420fed-801a-407c-8196-dec8d4b5acaa%26forceLocale={locale}",
+            "canUpdateConfiguration": false,
+            "scopes": [
+                "team"
+            ],
+            "context": [
+                "channelTab",
+                "privateChatTab",
+                "meetingSidePanel",
+                "meetingDetailsTab",
+                "meetingChatTab"
+            ]
+        }
+    ],
+    "staticTabs": [
+        {
+            "entityId": "62420fed-801a-407c-8196-dec8d4b5acaa",
+            "name": "Task tracker",
+            "contentUrl": "https://{teamSiteDomain}/_layouts/15/TeamsLogon.aspx?SPFX=true&dest=/_layouts/15/teamshostedapp.aspx%3Fteams%26personal%26componentId=62420fed-801a-407c-8196-dec8d4b5acaa%26forceLocale={locale}",
+            "websiteUrl": "https://admin.teams.microsoft.com/policies/manage-apps/d6862e0e-0986-4fe7-a8d4-3d05bb59de87",
+            "scopes": [
+                "personal",
+                "team"
+            ]
+        }
+    ],
+    "validDomains": [
+        "*.login.microsoftonline.com",
+        "*.sharepoint.com",
+        "resourceseng.blob.core.windows.net",
+        "{teamsitedomain}",
+        "cdn.XXXXX.com",
+        "spoppe-a.akamaihd.net",
+        "spoprod-a.akamaihd.net",
+        "msft.spoppe.com"
+    ],
+    "devicePermissions": [
+        "media",
+        "geolocation"
+    ],
+    "webApplicationInfo": {
+        "resource": "https://{teamSiteDomain}",
+        "id": "00000003-0000-0ff1-ce00-000000000000"
+    }
+}

@@ -1,0 +1,85 @@
+.loader {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    margin: 100px auto;
+    animation: rotateLoader 8s linear infinite;
+}
+
+.dot {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: #6e777f;
+    /* 👈 your color */
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform-origin: -5px 0;
+    opacity: 0.2;
+    animation: blink 1.2s ease-in-out infinite;
+}
+
+.dot1 {
+    transform: rotate(0deg) translateX(5px);
+    animation-delay: 0s;
+}
+
+.dot2 {
+    transform: rotate(60deg) translateX(5px);
+    animation-delay: 0.2s;
+}
+
+.dot3 {
+    transform: rotate(120deg) translateX(5px);
+    animation-delay: 0.4s;
+}
+
+.dot4 {
+    transform: rotate(180deg) translateX(5px);
+    animation-delay: 0.6s;
+}
+
+.dot5 {
+    transform: rotate(240deg) translateX(5px);
+    animation-delay: 0.8s;
+}
+
+.dot6 {
+    transform: rotate(300deg) translateX(5px);
+    animation-delay: 1s;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 0.2;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes rotateLoader {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    37.5% {
+        transform: rotate(-360deg);
+    }
+
+    50% {
+        transform: rotate(-360deg);
+    }
+
+    87.5% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}

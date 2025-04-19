@@ -27,7 +27,7 @@ const PreviewImages: React.FC<IPreviewImageProps> = ({
       numScroll: 1,
     },
     {
-      breakpoint: "767px",
+      breakpoint: "770px",
       numVisible: 2,
       numScroll: 1,
     },
