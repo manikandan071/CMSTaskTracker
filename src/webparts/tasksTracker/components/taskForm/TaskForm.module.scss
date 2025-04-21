@@ -14,7 +14,7 @@
     display: flex;
     flex-wrap: wrap;
     width: 100%;
-    padding: 20px;
+    padding: 10px 20px;
     background-color: #fff;
     @media screen and (max-width: 770px) {
         .sectionWrapper {
@@ -176,7 +176,8 @@
 }
 
 .dialogLoader {
-    height: 551px !important;
+    // height: 551px !important;
+    height: calc(100vh - 5px);
     display: flex;
     justify-content: center;
     align-items: center;

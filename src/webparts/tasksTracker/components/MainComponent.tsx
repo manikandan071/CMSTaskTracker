@@ -78,29 +78,30 @@ interface formDataDetails {
 
 const MainComponent = (props: any) => {
   // development site
-  // const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
+  const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
 
   // production site
-  const listWeb = Web(
-    "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
-  );
+  // const listWeb = Web(
+  //   "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
+  // );
 
   // const priorityOrderAsc = ["Low", "Medium", "High", "Critical"];
   // const priorityOrderDesc = [...priorityOrderAsc].reverse();
   const toast = useRef<Toast>(null);
-  const [sortState, setSortState] = useState({ Priority: 0, Date: 0 }); // 0: Default, 1: Asc, 2: Desc
-
+  const [sortState, setSortState] = useState({ Location: 0, Date: 0 }); // 0: Default, 1: Asc, 2: Desc
   const [masterTasksList, setMasterTasksList] = useState<taskDetails[]>();
   const [allTasksList, setAllTasksList] = useState<taskDetails[]>();
   const [showTasksList, setShowTasksList] = useState<taskDetails[]>();
   const [userCemeteryList, setUserCemeteryList] = useState<dropDownOptions[]>();
+  const [cemeteryListwithBg, setCemeteryListwithBg] = useState<any[]>();
   const [formData, setFormData] = useState<formDataDetails>();
   const [openForm, setOpenForm] = useState(false);
   const [isLoader, setIsLoader] = useState(false);
-  const [showToast, setShowToast] = useState<any>({});
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [imagePreview, setImagePreview] = useState<boolean>(false);
+  const [showToast, setShowToast] = useState<any>({});
   const [images, setImages] = useState<any[]>([]);
-  // const [itemOffset, setItemOffset] = useState(0);
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(9);
   const [expandCard, setExpandCard] = useState<any>(null);
@@ -158,7 +159,7 @@ const MainComponent = (props: any) => {
     setOpenForm(true);
   };
 
-  const getUserBasedGroups = async () => {
+  const getUserBasedGroups = async (isCompleted: boolean) => {
     try {
       setIsLoader(true);
       const user = await listWeb.currentUser.get();
@@ -186,6 +187,7 @@ const MainComponent = (props: any) => {
 
       const isMember = adminUsers.some((admin) => admin.Id === user.Id);
       const locationGroupList: dropDownOptions[] = [];
+      const locationGroupBG: any[] = [];
       await listWeb.lists
         .getByTitle("CemeteryGroupConfigure")
         .items.top(5000)
@@ -198,6 +200,11 @@ const MainComponent = (props: any) => {
               text: item.Title,
               GroupName: item.GroupName,
             };
+            const backgroundColor = {
+              title: item.Title,
+              backgroundColor: item.BackgroundColor,
+            };
+            locationGroupBG.push(backgroundColor);
             locationGroupList.push(tempObj);
           });
         })
@@ -219,13 +226,20 @@ const MainComponent = (props: any) => {
         .map((id) => `CemeteryLocation eq ${id}`)
         .join(" or ");
 
+      const fullFilter = `(${filterString}) and Progress ${
+        isCompleted ? "eq" : "ne"
+      } 'Completed'`;
+      const notCompleteFilter = `Progress ${
+        isCompleted ? "eq" : "ne"
+      } 'Completed'`;
+
       const userBasedTasksList = await listWeb.lists
         .getByTitle("AllTasks")
         .items.select(
           "*,AssignedTo0/Id,AssignedTo0/Title,AssignedTo0/EMail,CemeteryLocation/Id,CemeteryLocation/Title,CemeteryLocation/GroupName,Author/Id,Author/Title,Author/EMail,AttachmentFiles"
         )
         .expand("AssignedTo0,CemeteryLocation,Author,AttachmentFiles")
-        .filter(isMember ? "" : filterString)
+        .filter(isMember ? notCompleteFilter : fullFilter)
         .top(5000) // You can use pagination if needed
         .get();
 
@@ -277,7 +291,10 @@ const MainComponent = (props: any) => {
       setUserCemeteryList(
         isMember ? [...locationGroupList] : [...permittedLocations]
       );
+      setCemeteryListwithBg(locationGroupBG);
       setIsLoader(false);
+      setIsCompleted(isCompleted);
+      setIsAdmin(isMember);
     } catch (error) {
       console.error(error);
     }
@@ -316,7 +333,9 @@ const MainComponent = (props: any) => {
   const handleSortByDate = (Data: taskDetails[], type: string) => {
     const nextState =
       type === "click" ? (sortState?.Date + 1) % 3 : sortState?.Date;
-    setSortState({ ...sortState, Date: nextState });
+    type === "click"
+      ? setSortState({ ...sortState, Date: nextState, Location: 0 })
+      : setSortState({ ...sortState, Date: nextState });
 
     let sortedTasks = [...Data];
 
@@ -331,19 +350,52 @@ const MainComponent = (props: any) => {
         (a, b) => new Date(b.DueDate).getTime() - new Date(a.DueDate).getTime()
       );
     } else {
-      // Default (reset by Id)
-      sortedTasks = sortedTasks.sort((a: any, b: any) => b.Id - a.Id);
+      if (sortState?.Location === 0) {
+        // Default (reset by Id)
+        sortedTasks = sortedTasks.sort((a: any, b: any) => b.Id - a.Id);
+      }
     }
 
     setFirst(0);
-    setAllTasksList(sortedTasks);
+    (sortState?.Location === 0 || type === "click") &&
+      setAllTasksList(sortedTasks);
+  };
+
+  const handleSortByLocation = (Data: taskDetails[], type: string) => {
+    const nextState =
+      type === "click" ? (sortState?.Location + 1) % 3 : sortState?.Location;
+    type === "click"
+      ? setSortState({ ...sortState, Location: nextState, Date: 0 })
+      : setSortState({ ...sortState, Location: nextState });
+
+    let sortedTasks = [...Data];
+
+    if (nextState === 1) {
+      // Ascending (A-Z)
+      sortedTasks.sort((a, b) =>
+        (a?.CemeteryLocation || "").localeCompare(b?.CemeteryLocation || "")
+      );
+    } else if (nextState === 2) {
+      // Descending (Z-A)
+      sortedTasks.sort((a, b) =>
+        (b?.CemeteryLocation || "").localeCompare(a?.CemeteryLocation || "")
+      );
+    } else {
+      if (sortState?.Date === 0) {
+        // Default (reset by Id)
+        sortedTasks = sortedTasks.sort((a: any, b: any) => b.Id - a.Id);
+      }
+    }
+    setFirst(0);
+    (sortState?.Date === 0 || type === "click") && setAllTasksList(sortedTasks);
   };
 
   useEffect(() => {
     toast.current && toast.current.show(showToast);
   }, [showToast]);
+
   useEffect(() => {
-    getUserBasedGroups();
+    getUserBasedGroups(false);
   }, []);
 
   useEffect(() => {
@@ -365,13 +417,11 @@ const MainComponent = (props: any) => {
   };
 
   const formattedDate = (date: any) => {
-    return new Intl.DateTimeFormat("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-      .format(new Date(date))
-      .replace(/\//g, "-");
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${month}-${day}-${year}`;
   };
 
   // const descriptionBodyTemplate = (rowData: any) => {
@@ -414,6 +464,29 @@ const MainComponent = (props: any) => {
   //   );
   // };
 
+  const locationBodyTemplate = (location: any) => {
+    const getBGCode = cemeteryListwithBg?.find(
+      (item) => item.title === location
+    )?.backgroundColor;
+    return (
+      <p style={{ whiteSpace: "nowrap" }}>
+        <span
+          style={{
+            backgroundColor: getBGCode ? getBGCode : "#fff",
+            color: "#fff",
+            padding: "5px 10px",
+            fontWeight: "500",
+            borderRadius: "5px",
+            fontSize: "13px",
+          }}
+          title={location}
+        >
+          {location}
+        </span>
+      </p>
+    );
+  };
+
   const usersBodyTemplate = (users: any[]) => {
     return (
       <div>
@@ -448,7 +521,9 @@ const MainComponent = (props: any) => {
                       title={value.text}
                       size={PersonaSize.size32}
                     />
-                    <p className="user-full-name">{value.text}</p>
+                    <p className="user-full-name" title={value.text}>
+                      {value.text}
+                    </p>
                   </div>
                 );
               }
@@ -523,7 +598,9 @@ const MainComponent = (props: any) => {
         ) : (
           <></>
         )}
-        <span style={{ marginLeft: "5px" }}>{rowData?.Priority}</span>
+        <span style={{ marginLeft: "5px", fontSize: "13px" }}>
+          {rowData?.Priority}
+        </span>
       </div>
     );
   };
@@ -538,6 +615,7 @@ const MainComponent = (props: any) => {
             rowData?.Progress.toLowerCase() === "completed" ? "#fff" : "black",
           fontWeight: 500,
           display: "inline-block",
+          fontSize: "13px",
         }}
       >
         {rowData?.Progress}
@@ -549,7 +627,11 @@ const MainComponent = (props: any) => {
   // };
 
   const dueDateBodyTemplate = (rowData: any) => {
-    return <span>{formattedDate(rowData?.DueDate)}</span>;
+    return (
+      <span style={{ fontSize: "13px" }}>
+        {formattedDate(rowData?.DueDate)}
+      </span>
+    );
   };
 
   const actionBodyTemplate = (rowData: any) => {
@@ -633,10 +715,6 @@ const MainComponent = (props: any) => {
         />
       ) : isLoader ? (
         <div className={styles.loaderSection}>
-          {/* <i
-            className="pi pi-spin pi-spinner"
-            style={{ fontSize: "2rem", color: "#6c87a1" }}
-          /> */}
           <CustomLoader />
         </div>
       ) : imagePreview ? (
@@ -648,67 +726,31 @@ const MainComponent = (props: any) => {
       ) : (
         <div className="taskTableContainer">
           <Toast ref={toast} />
-          <div className="mobileTitle">
-            <h3>Task List</h3>
-          </div>
           <div className={styles.headerSection}>
-            <div className="desktopTitle">
-              <h3>Task List</h3>
+            <div>
+              <span
+                style={{
+                  fontSize: "20px",
+                  fontWeight: "700",
+                  color: "#4f5459",
+                }}
+              >
+                Task List
+              </span>
             </div>
-            <div className="emptySpace" />
             <div style={{ display: "flex", gap: "10px" }}>
-              <FilterSection
-                userCemeteryList={userCemeteryList || []}
-                masterTasksList={masterTasksList || []}
-                setAllTasksList={setAllTasksList}
-                setFirst={setFirst}
-                handleSortByDate={handleSortByDate}
-              />
-              {/* <div className="searchBox">
-                <Dropdown
-                  value={searchQueries?.location}
-                  onChange={(e) => serachQueryFunction(e.value, "location")}
-                  options={userCemeteryList}
-                  optionLabel="text"
-                  placeholder="Location"
-                  // className="w-full md:w-14rem"
-                />
-                <Dropdown
-                  value={searchQueries?.priority}
-                  onChange={(e) => serachQueryFunction(e.value, "priority")}
-                  options={priorityOptions}
-                  optionLabel="name"
-                  placeholder="Priority"
-                  // className="w-full md:w-14rem"
-                />
-                <Dropdown
-                  value={searchQueries?.progress}
-                  onChange={(e) => serachQueryFunction(e.value, "progress")}
-                  options={progressOptions}
-                  optionLabel="name"
-                  placeholder="Progress"
-                  // className="w-full md:w-14rem"
-                />
-                <InputText
-                  value={searchQueries?.text}
-                  type="text"
-                  className="p-inputtext-sm"
-                  placeholder="Search"
-                  onChange={(e) => serachQueryFunction(e.target.value, "text")}
-                />
-                <i
-                  className="pi pi-refresh"
+              {isAdmin && (
+                <Button
                   style={{
-                    fontSize: "1.2rem",
-                    color: "#fff",
-                    background: "#788da9",
-                    alignSelf: "center",
-                    padding: "7px",
-                    borderRadius: "5px",
-                    cursor: "pointer",
+                    backgroundColor: isCompleted ? "#b96859" : "#68b97b",
+                    border: `1px solid ${isCompleted ? "#b96859" : "#68b97b"}`,
                   }}
-                ></i>
-              </div> */}
+                  severity="success"
+                  size="small"
+                  label={`${isCompleted ? "Ongoing" : "Completed"}`}
+                  onClick={() => getUserBasedGroups(!isCompleted)}
+                />
+              )}
               <Button
                 // style={{ backgroundColor: "#69797e" }}
                 severity="secondary"
@@ -718,19 +760,43 @@ const MainComponent = (props: any) => {
               />
             </div>
           </div>
+          <FilterSection
+            masterTasksList={masterTasksList || []}
+            setAllTasksList={setAllTasksList}
+            setFirst={setFirst}
+            handleSortByDate={handleSortByDate}
+            handleSortByLocation={handleSortByLocation}
+            isCompleted={isCompleted}
+          />
           <div className={styles.desktopView}>
             <div className={styles.taskTableWrapper}>
               <div className={styles.customTableHeader}>
                 <div style={{ width: "20%" }}>
                   <p>Title</p>
                 </div>
-                <div className={styles.width15} style={{ width: "20%" }}>
+                <div
+                  // className={styles.progressColumn}
+                  style={{ width: "20%", cursor: "pointer" }}
+                  onClick={() =>
+                    handleSortByLocation(allTasksList || [], "click")
+                  }
+                >
                   <p>Cemetery location</p>
+                  <i
+                    className={`${
+                      sortState?.Location === 0
+                        ? "pi pi-sort"
+                        : sortState?.Location === 1
+                        ? "pi pi-sort-amount-down-alt"
+                        : "pi pi-sort-amount-down"
+                    }`}
+                    style={{ fontSize: "1.0rem" }}
+                  />
                 </div>
                 <div className={styles.tabletView} style={{ width: "10%" }}>
                   <p>Assigned by</p>
                 </div>
-                <div style={{ width: "10%" }}>
+                <div className={styles.progressColumn} style={{ width: "10%" }}>
                   <p>Assigned to</p>
                 </div>
                 <div
@@ -753,7 +819,7 @@ const MainComponent = (props: any) => {
                   <p>Progress</p>
                 </div>
                 <div
-                  className={styles.progressColumn}
+                  // className={styles.progressColumn}
                   style={{ width: "10%", cursor: "pointer" }}
                   onClick={() => handleSortByDate(allTasksList || [], "click")}
                 >
@@ -778,7 +844,13 @@ const MainComponent = (props: any) => {
                   Actions
                 </div>
               </div>
-              <div className={styles.customTable}>
+              <div
+                className={`${
+                  (allTasksList?.length ?? 0) < 10
+                    ? styles.fullCustomTable
+                    : styles.customTable
+                }`}
+              >
                 {showTasksList?.length === 0 && (
                   <div className={styles.noDataFound}>
                     <span>No tasks found</span>
@@ -796,10 +868,11 @@ const MainComponent = (props: any) => {
                       {rowData.Title}
                     </div>
                     <div
-                      className={styles.width15}
+                      // className={styles.progressColumn}s
                       style={{ width: "20%", padding: "10px 15px" }}
                     >
-                      {rowData.CemeteryLocation}
+                      {locationBodyTemplate(rowData?.CemeteryLocation)}
+                      {/* {rowData.CemeteryLocation} */}
                     </div>
                     <div
                       className={styles.tabletView}
@@ -807,7 +880,10 @@ const MainComponent = (props: any) => {
                     >
                       {usersBodyTemplate(rowData?.AssignedBy)}
                     </div>
-                    <div style={{ width: "10%", padding: "10px 15px" }}>
+                    <div
+                      className={styles.progressColumn}
+                      style={{ width: "10%", padding: "10px 15px" }}
+                    >
                       {usersBodyTemplate(rowData?.AssignedTo)}
                     </div>
                     <div style={{ width: "10%", padding: "10px 15px" }}>
@@ -820,7 +896,7 @@ const MainComponent = (props: any) => {
                       {progressBodyTemplate(rowData)}
                     </div>
                     <div
-                      className={styles.progressColumn}
+                      // className={styles.progressColumn}
                       style={{ width: "10%", padding: "10px 15px" }}
                     >
                       {dueDateBodyTemplate(rowData)}
@@ -933,7 +1009,8 @@ const MainComponent = (props: any) => {
                         width={15}
                         height={15}
                       />
-                      {task.CemeteryLocation}
+                      {locationBodyTemplate(task?.CemeteryLocation)}
+                      {/* {task.CemeteryLocation} */}
                     </p>
                   </div>
                   <div
@@ -958,7 +1035,7 @@ const MainComponent = (props: any) => {
                         alt=""
                         width={15}
                         height={15}
-                      />{" "}
+                      />
                       {formattedDate(task.DueDate)}
                     </p>
                     <p>
@@ -967,7 +1044,7 @@ const MainComponent = (props: any) => {
                         alt=""
                         width={15}
                         height={15}
-                      />{" "}
+                      />
                       {task?.AssignedBy[0].text}
                     </p>
                   </div>
@@ -1019,21 +1096,29 @@ const MainComponent = (props: any) => {
                     </div>
                   )}
                   <div className={styles.cardProgress}>
-                    <span
-                      style={{
-                        backgroundColor: getStatusColor(task?.Progress),
-                        padding: "2px 10px 5px 10px",
-                        borderRadius: "50px",
-                        color:
-                          task.Progress.toLowerCase() === "completed"
-                            ? "#fff"
-                            : "black",
-                        fontWeight: 500,
-                        display: "inline-block",
-                      }}
-                    >
-                      {task?.Progress}
-                    </span>
+                    <p>
+                      <img
+                        src={require("../../../images/arrowprogress.png")}
+                        alt=""
+                        width={15}
+                        height={15}
+                      />
+                      <span
+                        style={{
+                          backgroundColor: getStatusColor(task?.Progress),
+                          padding: "2px 10px 5px 10px",
+                          borderRadius: "50px",
+                          color:
+                            task.Progress.toLowerCase() === "completed"
+                              ? "#fff"
+                              : "black",
+                          fontWeight: 500,
+                          display: "inline-block",
+                        }}
+                      >
+                        {task?.Progress}
+                      </span>
+                    </p>
                     {/* <div style={{ display: "flex", gap: "20px" }}>
                       <i
                         className="pi pi-eye"

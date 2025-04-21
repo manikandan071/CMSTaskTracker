@@ -90,12 +90,12 @@ const TaskForm: React.FC<TaskFormProps> = ({
   setShowToast,
 }) => {
   // development site
-  // const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
+  const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
 
   // production site
-  const listWeb = Web(
-    "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
-  );
+  // const listWeb = Web(
+  //   "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
+  // );
   const datePickerRef = useRef<IDatePicker>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const webcamRef = useRef<Webcam>(null);
@@ -131,8 +131,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const [images, setImages] = useState<any[]>([]);
   const [isInTeams, setIsInTeams] = useState(true);
 
-  console.log("formData", formData);
-
   const onFilterChanged = (filterText: string) => {
     return filterText
       ? adGroupUsers.filter((user) =>
@@ -142,13 +140,13 @@ const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   const onFormatDate = (date?: Date): string => {
-    return !date
-      ? ""
-      : date.getDate() +
-          "/" +
-          (date.getMonth() + 1) +
-          "/" +
-          (date.getFullYear() % 100);
+    if (!date) return "";
+
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const year = date.getFullYear(); // full year, not two digits
+
+    return `${month}-${day}-${year}`;
   };
 
   const onParseDateFromString = React.useCallback(
@@ -706,14 +704,14 @@ const TaskForm: React.FC<TaskFormProps> = ({
             />
           )}
           <div className={styles.formHeader}>
-            <h2>
+            <h3 style={{ margin: "15px 0px" }}>
               {formData?.TaskType === "New"
-                ? "New"
+                ? "New "
                 : formData?.TaskType === "View"
-                ? "View"
-                : "Edit"}
+                ? "View "
+                : "Edit "}
               Task
-            </h2>
+            </h3>
             <i
               className="pi pi-times"
               style={{ fontSize: "1.0rem", cursor: "pointer" }}
@@ -1130,7 +1128,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 </label>
                 <InputTextarea
                   disabled={formData?.TaskType === "View" ? true : false}
-                  autoResize
+                  autoResize={false}
                   value={formData?.Notes}
                   onChange={(e) =>
                     formOnChange(
@@ -1140,7 +1138,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   }
                   id="notes"
                   placeholder="Enter here"
-                  rows={5}
+                  rows={formData?.TaskType === "New" ? 5 : 8}
                   cols={30}
                 />
               </div>

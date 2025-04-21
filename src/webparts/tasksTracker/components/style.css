@@ -14,7 +14,7 @@
 }
 .taskTableContainer{
     width: 100%;
-    padding: 20px!important;
+    padding: 10px 20px!important;
     background-color: #f0f5ff;
 }
 .description-body{
@@ -51,14 +51,11 @@ background-color: #6c757dfc;
 .taskTable .p-datatable-tbody>tr>td{
     font-size: 13px;
 }
-.headerSection .p-button-icon{
-    font-size: 0.7rem !important;
-}
 .p-dropdown-panel{
     background-color: #e9f5ff;
     border: 1px solid #e9f5ff !important;
 }
-.p-dropdown-panel .p-dropdown-items{
+.p-dropdown-panel .p-dropdown-items, .p-autocomplete-panel .p-autocomplete-items{
     padding: 0px !important;
 }
 .inputsection .p-inputtext,.inputsection .p-dropdown, .inputsection .p-calendar, .inputsection .p-fileupload{
@@ -131,10 +128,10 @@ background-color: #6c757dfc;
 
 /* filter Section style */
 
-.searchBox{
+/* .searchBox{
     display: flex;
     gap: 20px;
-}
+} */
 
 .searchBox .p-focus, .filterContent .p-focus{
     box-shadow: none !important;
@@ -214,11 +211,12 @@ background-color: #6c757dfc;
 .p-paginator{
     background-color: #f0f5ff !important;
     padding: 0px;
-    padding-top: 20px!important;
+    padding-top: 10px!important;
 }
 .mobilePaginationSec .p-paginator .p-paginator-current{
     border: none !important;
     background-color: #f0f5ff !important;
+    color: #6e777f !important;
 }
 .mobilePaginationSec .p-paginator{
     padding-top: 10px!important;
@@ -353,32 +351,32 @@ background-color: #6c757dfc;
 /* tablet view Style */
 
 @media (min-width: 765px) and (max-width: 1220px){
-    .searchBox .p-dropdown,.searchBox .p-inputtext {
+    /* .searchBox .p-dropdown,.searchBox .p-inputtext {
         width: 90px!important;
-    }
+    } */
 }
 @media (max-width: 1220px){
-    .searchBox .p-dropdown,.searchBox .p-inputtext {
+    /* .searchBox .p-dropdown,.searchBox .p-inputtext {
         width: 170px!important;
-    }
+    } */
     .user-selector-group .ms-Persona{
         display: none!important;
     }
 }
 @media (max-width: 1116px){
-    .searchBox .p-dropdown,.searchBox .p-inputtext {
+    /* .searchBox .p-dropdown,.searchBox .p-inputtext {
         width: 150px!important;
-    }
+    } */
 }
 @media (max-width: 980px){
-    .searchBox .p-dropdown,.searchBox .p-inputtext {
+    /* .searchBox .p-dropdown,.searchBox .p-inputtext {
         width: 110px!important;
-    }
+    } */
 }
 @media (max-width: 855px){
-    .searchBox .p-dropdown,.searchBox .p-inputtext {
+    /* .searchBox .p-dropdown,.searchBox .p-inputtext {
         width: 100px!important;
-    }
+    } */
 }
 @media (max-width: 404px){
     .optionSection i {
@@ -408,24 +406,7 @@ background-color: #6c757dfc;
     display: none !important;
 }
 
-@media (max-width: 494px) {
-   .desktopTitle{
-    display: none!important;
-   }
-   .emptySpace{
-    display: flex!important;
-   }
-    .mobileTitle{
-     display: block!important;
-    }
-    .mobileTitle h3{
-        margin: 0px!important;
-    }
-    .filterMobileView .p-inputtext{
-        width: 250px!important;
-    }
-}
-@media (max-width: 431px) {
+/* @media (max-width: 431px) {
     .filterMobileView .p-inputtext{
         width: 200px!important;
     }
@@ -434,14 +415,14 @@ background-color: #6c757dfc;
     .filterMobileView .p-inputtext{
         width: 150px!important;
     }
-}
+} */
 
 
 
 
 /* Drop down styles */
 /* Base dropdown panel */
-.p-dropdown-panel {
+.p-dropdown-panel, .p-autocomplete-panel {
     background-color: #e8f5e9;
     /* Light green background */
     border: 1px solid #81c784;
@@ -449,7 +430,7 @@ background-color: #6c757dfc;
 }
 
 /* Options */
-.p-dropdown-item {
+.p-dropdown-item, .p-autocomplete-item {
     background-color: #e8f5e9;
     /* Light green */
     color: #2e7d32;
@@ -458,7 +439,7 @@ background-color: #6c757dfc;
 }
 
 /* Hovered option */
-.p-dropdown-item:hover {
+.p-dropdown-item:hover, .p-autocomplete-item:hover {
     background-color: #c8e6c9;
     /* Slightly darker green */
     color: #1b5e20;
