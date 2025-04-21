@@ -1,0 +1,122 @@
+.filter-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+/* Right Side (Dropdowns & InputText) */
+.filter-right {
+    flex: 0 0 100%;
+    /* Full width on small screens */
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Left Side (AutoComplete) */
+.autocomplete-wrapper {
+    flex: 0 0 100%;
+    /* Full width on small screens */
+    max-width: 100%;
+}
+.p-autocomplete-input-token{
+    padding: 0px;
+    font-size: 14px;
+}
+.p-autocomplete-input-token input{
+    font-size: 14px;
+}
+
+@media (min-width: 770px) {
+    .searchBox {
+        display: flex;
+    }
+
+    .autocomplete-wrapper {
+        flex: 0 0 34%;
+        max-width: 34%;
+    }
+
+    .filter-right {
+        flex: 0 0 66%;
+        max-width: 66%;
+    }
+        .bottom-row {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+    .autocomplete-wrapper .autocomplete {
+        width: 100%;
+        padding-right: 10px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .searchBox{
+        display: flex;
+    }
+    .autocomplete-wrapper {
+        flex: 0 0 40%;
+        max-width: 40%;
+    }
+           .filter-right {
+               flex: 0 0 60%;
+               max-width: 60%;
+           }
+           .bottom-row{
+                flex: 0 0 100%;
+                max-width: 100%;
+           }
+        .autocomplete-wrapper .autocomplete {
+            width: 100%;
+            padding-right: 10px;
+        }
+    
+       
+}
+.autocomplete ul {
+     width: 100%;
+     height: 72px;
+     align-items: start;
+     padding: 10px;
+     overflow: auto;
+ }
+ .autocomplete ul .p-highlight{
+    background-color: #a5d6a7;
+    color: #1f5e20;
+ }
+/* Top Row of Dropdowns */
+.top-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.top-row .dropdown {
+    flex: 1 1 32%;
+    min-width: 120px;
+}
+
+/* Bottom Row: Input + Refresh Icon */
+.bottom-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.bottom-row .search-input {
+    flex: 1 1 90%;
+    min-width: 140px;
+}
+
+.bottom-row .refresh-icon {
+    align-self: center;
+}
+
+.filterMobileView .p-inputtext{
+        width: 95%!important;
+    }
+
