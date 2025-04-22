@@ -2,7 +2,7 @@
     "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
     "manifestVersion": "1.16",
     "id": "62420fed-801a-407c-8196-dec8d4b5acaa",
-    "version": "8.0.7",
+    "version": "8.0.8",
     "developer": {
         "name": "Cemetery Management",
         "websiteUrl": "https://admin.teams.microsoft.com/policies/manage-apps/d6862e0e-0986-4fe7-a8d4-3d05bb59de87",
@@ -11,8 +11,8 @@
         "mpnId": "12345"
     },
     "name": {
-        "full": "Task tracker",
-        "short": "Task tracker"
+        "full": "Task Tracker",
+        "short": "Task Tracker"
     },
     "description": {
         "short": "Task tracker",
@@ -42,7 +42,7 @@
     "staticTabs": [
         {
             "entityId": "62420fed-801a-407c-8196-dec8d4b5acaa",
-            "name": "Task tracker",
+            "name": "Task Tracker",
             "contentUrl": "https://{teamSiteDomain}/_layouts/15/TeamsLogon.aspx?SPFX=true&dest=/_layouts/15/teamshostedapp.aspx%3Fteams%26personal%26componentId=62420fed-801a-407c-8196-dec8d4b5acaa%26forceLocale={locale}",
             "websiteUrl": "https://admin.teams.microsoft.com/policies/manage-apps/d6862e0e-0986-4fe7-a8d4-3d05bb59de87",
             "scopes": [

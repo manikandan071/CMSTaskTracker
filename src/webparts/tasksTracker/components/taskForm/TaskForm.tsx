@@ -10,13 +10,6 @@ import {
   // IBasePickerSuggestionsProps,
   NormalPeoplePicker,
 } from "@fluentui/react/lib/Pickers";
-import {
-  DatePicker,
-  IDatePicker,
-  mergeStyleSets,
-  defaultDatePickerStrings,
-  // ChoiceGroup,
-} from "@fluentui/react";
 import { Panel } from "@fluentui/react";
 import { useEffect, useRef, useState } from "react";
 import { graph } from "@pnp/graph";
@@ -28,8 +21,10 @@ import Webcam from "react-webcam";
 import styles from "./TaskForm.module.scss";
 import PreviewImages from "../PreviewImages/PreViewImages";
 import { Toast } from "primereact/toast";
+import { Calendar } from "primereact/calendar";
 import { app, media } from "@microsoft/teams-js";
 import CustomLoader from "../CustomLoader/CustomLoader";
+import "./taskForm.css";
 
 interface taskDetails {
   Title: string;
@@ -77,6 +72,9 @@ interface TaskFormProps {
   setAllTasksList: React.Dispatch<
     React.SetStateAction<taskDetails[] | undefined>
   >;
+  setMasterTasksList: React.Dispatch<
+    React.SetStateAction<taskDetails[] | undefined>
+  >;
   setOpenForm: React.Dispatch<React.SetStateAction<boolean>>;
   setShowToast: React.Dispatch<React.SetStateAction<any>>;
 }
@@ -86,17 +84,17 @@ const TaskForm: React.FC<TaskFormProps> = ({
   initialData,
   userCemeteryList,
   setAllTasksList,
+  setMasterTasksList,
   setOpenForm,
   setShowToast,
 }) => {
   // development site
-  const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
+  // const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
 
   // production site
-  // const listWeb = Web(
-  //   "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
-  // );
-  const datePickerRef = useRef<IDatePicker>(null);
+  const listWeb = Web(
+    "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const webcamRef = useRef<Webcam>(null);
   const toast = useRef<Toast>(null);
@@ -111,11 +109,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
     { key: "In progress", text: "In progress" },
     { key: "Completed", text: "Completed" },
   ];
-
-  const datePickerStyles = mergeStyleSets({
-    root: { selectors: { "> *": { marginBottom: 15 } } },
-    control: { maxWidth: 300, marginBottom: 15 },
-  });
 
   // React States
 
@@ -138,41 +131,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
         )
       : [];
   };
-
-  const onFormatDate = (date?: Date): string => {
-    if (!date) return "";
-
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const year = date.getFullYear(); // full year, not two digits
-
-    return `${month}-${day}-${year}`;
-  };
-
-  const onParseDateFromString = React.useCallback(
-    (newValue: string): Date => {
-      const previousValue = formData?.StartDate || new Date();
-      const newValueParts = (newValue || "").trim().split("/");
-      const day =
-        newValueParts.length > 0
-          ? Math.max(1, Math.min(31, parseInt(newValueParts[0], 10)))
-          : previousValue.getDate();
-      const month =
-        newValueParts.length > 1
-          ? Math.max(1, Math.min(12, parseInt(newValueParts[1], 10))) - 1
-          : previousValue.getMonth();
-      let year =
-        newValueParts.length > 2
-          ? parseInt(newValueParts[2], 10)
-          : previousValue.getFullYear();
-      if (year < 100) {
-        year +=
-          previousValue.getFullYear() - (previousValue.getFullYear() % 100);
-      }
-      return new Date(year, month, day);
-    },
-    [formData?.StartDate]
-  );
 
   const handleFileUpload = (event: any) => {
     const files = Array.from(event.target.files);
@@ -414,6 +372,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
         setAllTasksList((obj: any) => {
           return [...obj, tempObject].sort((a: any, b: any) => b.Id - a.Id);
         });
+        setMasterTasksList((obj: any) => {
+          return [...obj, tempObject].sort((a: any, b: any) => b.Id - a.Id);
+        });
         setOpenForm(false);
         setImages([]);
         setShowToast({
@@ -477,6 +438,13 @@ const TaskForm: React.FC<TaskFormProps> = ({
             };
             setDialogLoader(false);
             setAllTasksList((prevTasks: any) =>
+              prevTasks
+                .map((task: any) =>
+                  task.Id === formData?.Id ? tempObject : task
+                )
+                .sort((a: any, b: any) => b.Id - a.Id)
+            );
+            setMasterTasksList((prevTasks: any) =>
               prevTasks
                 .map((task: any) =>
                   task.Id === formData?.Id ? tempObject : task
@@ -838,7 +806,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 </label>
                 <NormalPeoplePicker
                   disabled={
-                    formData?.TaskType === "View" || !formData?.recOwner
+                    formData?.TaskType === "View" ||
+                    !formData?.recOwner ||
+                    formData?.CemeteryLocation?.text === ""
                       ? true
                       : false
                   }
@@ -857,7 +827,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
             </div>
             {/* <div className={styles.sectionWrapper}></div> */}
             <div className={styles.sectionWrapper}>
-              <div style={{ display: "flex", gap: "1rem" }}>
+              {/* <div style={{ display: "flex", gap: "1rem" }}>
                 <div
                   className={`inputsection ${styles.sectionControl} ${
                     !formData?.isValid
@@ -883,7 +853,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                         : undefined
                     }
                     componentRef={datePickerRef}
-                    allowTextInput
+                    // allowTextInput
                     ariaLabel="Select a date. Input format is day slash month slash year."
                     value={formData?.StartDate}
                     onSelectDate={(date?: Date) => {
@@ -918,7 +888,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                     }
                     minDate={new Date(formData?.StartDate) || new Date()}
                     componentRef={datePickerRef}
-                    allowTextInput
+                    // allowTextInput
                     ariaLabel="Select a date. Input format is day slash month slash year."
                     value={formData?.DueDate}
                     onSelectDate={(date?: Date) => {
@@ -932,8 +902,73 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   />
                   <span className="errormsg">Please select duedate</span>
                 </div>
+              </div> */}
+
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <div
+                  className={`inputsection ${styles.sectionControl} ${
+                    !formData?.isValid
+                      ? formData?.StartDate === ""
+                        ? "error"
+                        : "noterror"
+                      : "noterror"
+                  }`}
+                >
+                  <label className={styles.sectionLabel} htmlFor="startdate">
+                    Start Date <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <Calendar
+                    id="buttondisplay"
+                    value={formData?.StartDate}
+                    onChange={(e) => formOnChange(e.value, "StartDate")}
+                    showIcon
+                    disabled={
+                      formData?.TaskType === "View" || !formData?.recOwner
+                        ? true
+                        : false
+                    }
+                    minDate={new Date()}
+                    maxDate={
+                      formData?.DueDate
+                        ? new Date(formData?.DueDate)
+                        : undefined
+                    }
+                    dateFormat="mm-dd-yy"
+                    placeholder="Select a date"
+                  />
+                  <span className="errormsg">Please select start date</span>
+                </div>
+                <div
+                  className={`inputsection ${styles.sectionControl} ${
+                    !formData?.isValid
+                      ? formData?.DueDate === ""
+                        ? "error"
+                        : "noterror"
+                      : "noterror"
+                  }`}
+                >
+                  <label className={styles.sectionLabel} htmlFor="duedate">
+                    Due Date <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <Calendar
+                    id="buttondisplay"
+                    value={formData?.DueDate}
+                    onChange={(e) => formOnChange(e.value, "DueDate")}
+                    showIcon
+                    disabled={
+                      formData?.TaskType === "View" ||
+                      formData?.StartDate === "" ||
+                      !formData?.recOwner
+                        ? true
+                        : false
+                    }
+                    minDate={new Date(formData?.StartDate) || new Date()}
+                    dateFormat="mm-dd-yy"
+                    placeholder="Select a date"
+                  />
+                  <span className="errormsg">Please select duedate</span>
+                </div>
               </div>
-              {/* <div className={styles.halfSection}></div> */}
               <div className={`inputsection ${styles.sectionControl}`}>
                 <label className={styles.sectionLabel} htmlFor="priority">
                   Priority

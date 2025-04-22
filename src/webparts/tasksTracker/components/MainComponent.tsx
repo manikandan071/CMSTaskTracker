@@ -78,15 +78,17 @@ interface formDataDetails {
 
 const MainComponent = (props: any) => {
   // development site
-  const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
+  // const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
 
   // production site
-  // const listWeb = Web(
-  //   "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
-  // );
+  const listWeb = Web(
+    "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
+  );
 
   // const priorityOrderAsc = ["Low", "Medium", "High", "Critical"];
   // const priorityOrderDesc = [...priorityOrderAsc].reverse();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerMobileRef = useRef<HTMLDivElement>(null);
   const toast = useRef<Toast>(null);
   const [sortState, setSortState] = useState({ Location: 0, Date: 0 }); // 0: Default, 1: Asc, 2: Desc
   const [masterTasksList, setMasterTasksList] = useState<taskDetails[]>();
@@ -672,6 +674,23 @@ const MainComponent = (props: any) => {
   // pagination function
 
   const onPageChange = (event: any) => {
+    if (scrollContainerRef.current) {
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }, 0);
+    }
+    if (scrollContainerMobileRef.current) {
+      setTimeout(() => {
+        if (scrollContainerMobileRef.current) {
+          scrollContainerMobileRef.current.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          });
+        }
+      }, 0);
+    }
     setFirst(event.first);
     setRows(event.rows);
   };
@@ -710,6 +729,7 @@ const MainComponent = (props: any) => {
           initialData={formData}
           userCemeteryList={userCemeteryList}
           setAllTasksList={setAllTasksList}
+          setMasterTasksList={setMasterTasksList}
           setOpenForm={setOpenForm}
           setShowToast={setShowToast}
         />
@@ -744,20 +764,23 @@ const MainComponent = (props: any) => {
                   style={{
                     backgroundColor: isCompleted ? "#b96859" : "#68b97b",
                     border: `1px solid ${isCompleted ? "#b96859" : "#68b97b"}`,
+                    fontSize: "12px",
                   }}
                   severity="success"
                   size="small"
-                  label={`${isCompleted ? "Ongoing" : "Completed"}`}
+                  label={`${isCompleted ? "Ongoing tasks" : "Completed tasks"}`}
                   onClick={() => getUserBasedGroups(!isCompleted)}
                 />
               )}
-              <Button
-                // style={{ backgroundColor: "#69797e" }}
-                severity="secondary"
-                size="small"
-                label="New Task"
-                onClick={createNewForm}
-              />
+              {!isCompleted && (
+                <Button
+                  style={{ fontSize: "12px" }}
+                  severity="secondary"
+                  size="small"
+                  label="New Task"
+                  onClick={createNewForm}
+                />
+              )}
             </div>
           </div>
           <FilterSection
@@ -845,6 +868,7 @@ const MainComponent = (props: any) => {
                 </div>
               </div>
               <div
+                ref={scrollContainerRef}
                 className={`${
                   (allTasksList?.length ?? 0) < 10
                     ? styles.fullCustomTable
@@ -986,6 +1010,7 @@ const MainComponent = (props: any) => {
           </div>
 
           <div
+            ref={scrollContainerMobileRef}
             className={`${
               (allTasksList?.length ?? 0) < 10 ? styles.fullmobileView : ""
             } ${styles.mobileView}`}
@@ -1020,7 +1045,12 @@ const MainComponent = (props: any) => {
                       alignItems: "center",
                     }}
                   >
-                    <p>
+                    <p
+                      style={{
+                        color: `${priorityColors[task.Priority]}`,
+                        fontWeight: "500",
+                      }}
+                    >
                       <img
                         src={require("../../../images/priority-arrows.png")}
                         alt=""
@@ -1029,7 +1059,7 @@ const MainComponent = (props: any) => {
                       />
                       {task.Priority}
                     </p>
-                    <p>
+                    <p style={{ fontWeight: "500" }}>
                       <img
                         src={require("../../../images/calendar-clock.png")}
                         alt=""
@@ -1038,12 +1068,12 @@ const MainComponent = (props: any) => {
                       />
                       {formattedDate(task.DueDate)}
                     </p>
-                    <p>
+                    <p style={{ fontWeight: "500" }}>
                       <img
-                        src={require("../../../images/admin.png")}
+                        src={require("../../../images/user-skill-gear.png")}
                         alt=""
-                        width={15}
-                        height={15}
+                        width={18}
+                        height={17}
                       />
                       {task?.AssignedBy[0].text}
                     </p>
@@ -1103,21 +1133,23 @@ const MainComponent = (props: any) => {
                         width={15}
                         height={15}
                       />
-                      <span
-                        style={{
-                          backgroundColor: getStatusColor(task?.Progress),
-                          padding: "2px 10px 5px 10px",
-                          borderRadius: "50px",
-                          color:
-                            task.Progress.toLowerCase() === "completed"
-                              ? "#fff"
-                              : "black",
-                          fontWeight: 500,
-                          display: "inline-block",
-                        }}
-                      >
-                        {task?.Progress}
-                      </span>
+                      <p>
+                        <span
+                          style={{
+                            backgroundColor: getStatusColor(task?.Progress),
+                            padding: "2px 10px 5px 10px",
+                            borderRadius: "50px",
+                            color:
+                              task.Progress.toLowerCase() === "completed"
+                                ? "#fff"
+                                : "black",
+                            fontWeight: 500,
+                            display: "inline-block",
+                          }}
+                        >
+                          {task?.Progress}
+                        </span>
+                      </p>
                     </p>
                     {/* <div style={{ display: "flex", gap: "20px" }}>
                       <i
