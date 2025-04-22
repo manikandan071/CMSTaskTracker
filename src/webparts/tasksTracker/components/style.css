@@ -79,15 +79,20 @@ background-color: #6c757dfc;
 .ms-BasePicker-text{
     padding: 5px !important;
     border: 1px solid #ced4da !important;
-    min-height: 50px !important;
-    max-height: 103px !important;
+    min-height: 83px !important;
+    max-height: 83px !important;
     overflow-x: hidden !important;
+}
+.ms-BasePicker-text .ms-BasePicker-itemsWrapper{
+    align-self: start!important;
 }
 .ms-BasePicker-text input{
     color: #000!important;
+    align-self: start!important;
 }
 .ms-BasePicker-text::after{
-    border: 1px solid #6c87a1 !important;
+    /* border: 1px solid #6c87a1 !important; */
+    border: none;
 }
 .viewOnly .ms-BasePicker-text::after {
     border: none!important;
@@ -298,15 +303,20 @@ background-color: #6c757dfc;
 
 /* toast message styles */
 .p-toast{
-    top: 25px !important;
-    right: 25px !important;
+    top: 10px !important;
+    right: 10px !important;
     width: 80% !important;
 }
 .p-toast .p-toast-message-content{
     align-items: center !important;
+    padding: 10px 10px 10px 20px !important;
 }
 .p-toast-message-content svg{
-    display: none;
+    width: 1rem !important;
+    height: 1rem !important;
+}
+.p-toast-message-text{
+    margin: 0px 0px 0px 10px !important;
 }
 .p-toast-message-text .p-toast-summary{
     display: none;

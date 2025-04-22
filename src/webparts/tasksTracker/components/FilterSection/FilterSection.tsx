@@ -53,22 +53,22 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   isCompleted,
 }) => {
   const priorityOptions = [
-    { name: "None", code: "None" },
+    { name: "All", code: "All" },
     { name: "Critical", code: "Critical" },
     { name: "High", code: "High" },
     { name: "Medium", code: "Medium" },
     { name: "Low", code: "Low" },
   ];
   const progressOptions = [
-    { name: "None", code: "None" },
+    { name: "All", code: "All" },
     { name: "Not started", code: "Not started" },
     { name: "In progress", code: "In progress" },
   ];
   const [searchQueries, setSearchQueries] = useState<any>({
     text: "",
     assignTo: [],
-    priority: { name: "", code: "" },
-    progress: { name: "", code: "" },
+    priority: null,
+    progress: null,
     location: null,
   });
 
@@ -77,22 +77,28 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   const [locationList, setLocationList] = useState<dropDownOptions[]>([]);
   const [filterAssignedToUsers, setFilterAssignedToUsers] = useState<any[]>([]);
 
-  const serachAndFilterFunction = (value: any, field: string) => {
-    console.log("serachAndFilterFunction", value, field);
+  const formattedDate = (date: any) => {
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${month}-${day}-${year}`;
+  };
 
+  const serachAndFilterFunction = (value: any, field: string) => {
     let updatedQuery: any;
     if (field === "Clear") {
       updatedQuery = {
         text: "",
         assignTo: [],
-        priority: { name: "", code: "" },
-        progress: { name: "", code: "" },
+        priority: null,
+        progress: null,
         location: null,
       };
     } else {
       updatedQuery = {
         ...searchQueries,
-        [field]: value?.name === "None" ? { name: "", code: "" } : value,
+        [field]: value?.name === "All" ? null : value,
       };
     }
 
@@ -104,24 +110,25 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       const matchesText =
         !textFilter ||
         item?.Title?.toLowerCase().includes(textFilter) ||
-        item?.Description?.toLowerCase().includes(textFilter) ||
         item?.CemeteryLocation?.toLowerCase().includes(textFilter) ||
         item?.AssignedTo?.some((user: any) =>
           user?.text?.toLowerCase().includes(textFilter)
         ) ||
         item?.AssignedBy?.some((user: any) =>
           user?.text?.toLowerCase().includes(textFilter)
-        );
+        ) ||
+        formattedDate(item?.DueDate).includes(textFilter);
+
       const matchesLocation =
-        !updatedQuery?.location?.text ||
-        item?.CemeteryLocation === updatedQuery.location.text;
+        !updatedQuery?.location?.name ||
+        item?.CemeteryLocation === updatedQuery.location.name;
 
       const matchesPriority =
         !updatedQuery?.priority?.name ||
         item?.Priority === updatedQuery.priority.name;
 
       const matchesProgress =
-        !updatedQuery.progress.name ||
+        !updatedQuery?.progress?.name ||
         item?.Progress === updatedQuery.progress.name;
 
       const matchesAssignedTo =
@@ -158,10 +165,16 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         index === self.findIndex((u) => u.secondaryText === user.secondaryText)
     );
     setAssignedToUsersList(uniqueUsers);
-    console.log(uniqueUsers);
   };
   const bindLocationList = () => {
-    const uniqueLocations: any[] = [];
+    const uniqueLocations: any[] = [
+      {
+        id: 0,
+        key: 0,
+        name: "All",
+        GroupName: "All",
+      },
+    ];
     const seen = new Set();
 
     masterTasksList.forEach((task: any) => {
@@ -171,7 +184,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         uniqueLocations.push({
           id: task.CemeteryLocationId,
           key: task.CemeteryLocationId,
-          text: task.CemeteryLocation,
+          name: task.CemeteryLocation,
           GroupName: task.GroupName,
         });
       }
@@ -222,7 +235,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               value={searchQueries?.location}
               onChange={(e) => serachAndFilterFunction(e.value, "location")}
               options={locationList}
-              optionLabel="text"
+              optionLabel="name"
               placeholder="Location"
               editable
               className="dropdown"
@@ -250,9 +263,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 value={searchQueries?.text}
                 type="text"
                 className="p-inputtext-sm search-input"
-                placeholder="Search"
+                placeholder="Search title, location, assigned by, assigned to, due date"
                 onChange={(e) =>
-                  serachAndFilterFunction(e.target.value, "text")
+                  serachAndFilterFunction(e.target.value.trimStart(), "text")
                 }
               />
               <i
@@ -278,8 +291,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           style={{ width: "240px" }}
           value={searchQueries?.text}
           type="text"
-          placeholder="Search"
-          onChange={(e) => serachAndFilterFunction(e.target.value, "text")}
+          placeholder="Search title, location, assigned by, assigned to, due date"
+          onChange={(e) =>
+            serachAndFilterFunction(e.target.value.trimStart(), "text")
+          }
         />
         <i
           className="pi pi-refresh"
@@ -363,7 +378,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             value={searchQueries?.location}
             onChange={(e) => serachAndFilterFunction(e.value, "location")}
             options={locationList}
-            optionLabel="text"
+            optionLabel="name"
             placeholder="Location"
             // appendTo="self"
             appendTo={document.body}
