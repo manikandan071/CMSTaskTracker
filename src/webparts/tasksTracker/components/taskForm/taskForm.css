@@ -140,7 +140,9 @@
     color: #fff;
     background: #6e777f;
 }
-.p-yearpicker-year:focus, .p-monthpicker-month:focus{
+
+.p-yearpicker-year:focus,
+.p-monthpicker-month:focus {
     box-shadow: none !important;
     outline: none !important;
 }
