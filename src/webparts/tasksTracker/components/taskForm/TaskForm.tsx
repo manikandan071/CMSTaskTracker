@@ -652,7 +652,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   return (
-    <div>
+    <div className="taskFormContainer">
       <Toast ref={toast} />
       {dialogLoader ? (
         <div className={styles.dialogLoader}>
@@ -1219,51 +1219,53 @@ const TaskForm: React.FC<TaskFormProps> = ({
                       Upload Image
                     </button>
                   </div>
-                  {images?.length > 0 ? (
-                    <div
-                      className={`${
-                        formData?.TaskType === "View"
-                          ? styles.viewImageList
-                          : styles.imageList
-                      } imageList-section`}
-                    >
-                      {images.map((img, index) => (
-                        <div key={index} className={styles.imageCard}>
-                          <div className={styles.imgPreview}>
-                            <img
-                              src={img.url}
-                              alt={img.name}
-                              onClick={() => {
-                                setImagePreview(true);
-                                setPreviewImageIndex(index);
-                              }}
-                            />
-                            {formData?.TaskType !== "View" && (
-                              <button
-                                className={styles.deleteBtn}
-                                onClick={() => handleRemoveImage(index)}
+                  {/* {images?.length > 0 ? ( */}
+                  <div
+                    className={`${
+                      formData?.TaskType === "View"
+                        ? styles.viewImageList
+                        : styles.imageList
+                    } imageList-section ${
+                      images?.length === 0 ? "showImages" : ""
+                    }`}
+                  >
+                    {images.map((img, index) => (
+                      <div key={index} className={styles.imageCard}>
+                        <div className={styles.imgPreview}>
+                          <img
+                            src={img.url}
+                            alt={img.name}
+                            onClick={() => {
+                              setImagePreview(true);
+                              setPreviewImageIndex(index);
+                            }}
+                          />
+                          {formData?.TaskType !== "View" && (
+                            <button
+                              className={styles.deleteBtn}
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                height="16"
+                                width="16"
+                                viewBox="0 0 24 24"
+                                fill="white"
                               >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  height="16"
-                                  width="16"
-                                  viewBox="0 0 24 24"
-                                  fill="white"
-                                >
-                                  <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                          <div title={img.name} className={styles.imageName}>
-                            {img.name}
-                          </div>
+                                <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
+                              </svg>
+                            </button>
+                          )}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="imageList-section" />
-                  )}
+                        <div title={img.name} className={styles.imageName}>
+                          {img.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* // ) : (
+                  //   <div className="imageList-section" />
+                  // )} */}
                   <div className={`${styles.footerSection} formFooter-section`}>
                     <Button
                       style={{ border: "1px solid #6c757d" }}

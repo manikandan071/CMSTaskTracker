@@ -1,12 +1,13 @@
 $tablet-min: 770px;
 $tablet-max: 1024px;
 
-.headerSection{
+.headerSection {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
 }
+
 .loaderSection {
     // height: 551px !important;
     height: calc(100vh - 5px);
@@ -19,41 +20,47 @@ $tablet-max: 1024px;
 .mobileView {
     display: none; // default hidden
 }
-.taskTableWrapper{
+
+.taskTableWrapper {
     margin-top: 10px;
+
     // height: calc(87vh - 100px);
     // overflow-y: auto;
-    .customTableHeader{
+    .customTableHeader {
         display: flex;
-        width: 100%!important;
+        width: 100% !important;
         background: #6e777f;
         font-weight: 500;
         color: #fff;
         border-radius: 5px 5px 0px 0px;
-        div{
+
+        div {
             padding: 0px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            p{
+
+            p {
                 display: block;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-
             }
         }
     }
-    .customTable{
-        height: calc(75vh - 105px);
+
+    .customTable {
+        height: calc(78vh - 100px);
         overflow-y: auto;
         border-radius: 0px 0px 10px 10px;
-        .tableRow{
+
+        .tableRow {
             display: flex;
             align-items: center;
             background-color: #fff;
             border-bottom: 1px solid #6e777f26;
-            .taskTitle{
+
+            .taskTitle {
                 display: -webkit-box;
                 -webkit-line-clamp: 3;
                 line-clamp: 3;
@@ -63,41 +70,44 @@ $tablet-max: 1024px;
                 text-overflow: ellipsis;
                 margin: 10px 0px;
                 padding: 0px 15px;
-
             }
-            div div{
+
+            div div {
                 display: flex;
                 align-items: center;
             }
         }
     }
-        .fullCustomTable {
-            height: calc(85vh - 105px);
-            overflow-y: auto;
-            border-radius: 0px 0px 10px 10px;
-            .tableRow {
+
+    .fullCustomTable {
+        height: calc(85vh - 105px);
+        overflow-y: auto;
+        border-radius: 0px 0px 10px 10px;
+
+        .tableRow {
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            border-bottom: 1px solid #6e777f26;
+
+            .taskTitle {
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                line-clamp: 3;
+                /* Limit to 3 lines */
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin: 10px 0px;
+                padding: 0px 15px;
+            }
+
+            div div {
                 display: flex;
                 align-items: center;
-                background-color: #fff;
-                border-bottom: 1px solid #6e777f26;
-                .taskTitle {
-                    display: -webkit-box;
-                    -webkit-line-clamp: 3;
-                    line-clamp: 3;
-                    /* Limit to 3 lines */
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    margin: 10px 0px;
-                    padding: 0px 15px;
-    
-                }
-                div div {
-                    display: flex;
-                    align-items: center;
-                }
             }
         }
+    }
 }
 
 .card {
@@ -111,14 +121,15 @@ $tablet-max: 1024px;
 }
 
 .cardHeader {
-    h3{
-        margin: 0px 0px 10px 0px ;
+    h3 {
+        margin: 0px 0px 10px 0px;
         font-size: 15px;
         color: #4f2674;
     }
 }
-.cardContent{
-    p{
+
+.cardContent {
+    p {
         margin: 6px 0;
         font-size: 13px;
         display: flex;
@@ -129,35 +140,41 @@ $tablet-max: 1024px;
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .cardProgress{
+
+    .cardProgress {
         padding-top: 8px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        span{
+
+        span {
             font-size: 13px;
         }
     }
 }
- .mobilePaginator {
-     display: none;
- }
- .noDataFound {
-     display: flex;
-     justify-content: center;
-     margin-top: 20px;
-     color: #403555;
-     font-weight: 500;
- }
+
+.mobilePaginator {
+    display: none;
+}
+
+.noDataFound {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    color: #403555;
+    font-weight: 500;
+}
 
 // 🔁 Responsive Rules
 @media screen and (max-width: 770px) {
     .desktopView {
         display: none;
     }
-    .mobilePaginator{
+
+    .mobilePaginator {
         display: block;
     }
+
     .noDataFound {
         display: flex;
         justify-content: center;
@@ -165,69 +182,78 @@ $tablet-max: 1024px;
         color: #403555;
         font-weight: 500;
     }
+
     .mobileView {
         display: block;
-        height: calc(91vh - 100px);
+        height: calc(91dvh - 100px);
         overflow-y: auto;
     }
-    .fullmobileView{
+
+    .fullmobileView {
         display: block;
-        height: calc(100vh - 100px);
+        height: calc(99dvh - 100px);
         overflow-y: auto;
     }
 }
 
 .Persona {
-    width: 30px;
-    height: 30px;
-    background-color: #0a1b39;
+    width: 25px;
+    height: 25px;
+    background-color: #4d51a6;
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    font-size: 13px;
-
+    font-size: 10px;
+    font-weight: 600;
     .AllPersona {
         visibility: visible;
     }
 }
 
-
+@media screen and (min-width: 770px) and (max-width: 1380px) {
+    .tabletView {
+        display: none !important;
+    }
+}
 
 @media screen and (min-width: 770px) and (max-width: 1380px) {
-   .tabletView{
-    display: none!important;
-   }
+    .customTableHeader {
+        font-size: 13px;
+    }
+    .tableRow {
+        font-size: 13px;
+    }
+    .progressColumn {
+        width: 15% !important;
+    }
 }
-@media screen and (min-width: 770px) and (max-width: 1380px) {
-   .customTableHeader{
-   font-size: 13px;
-   }
-   .tableRow{
-   font-size: 13px;
-   }
-   .progressColumn{
-    width: 15%!important;
-   }
-}
+
 @media screen and (min-width: 770px) and (max-width: 1005px) {
-   .tableRow div span{
-    font-size: 12px;
-    display: block;
-    overflow: hidden;
+    .tableRow div span {
+        font-size: 12px;
+        display: block;
+        overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-   }
-   .width15{
-    width: 15%!important;
-   }
+    }
+
+    .width15 {
+        width: 15% !important;
+    }
 }
 
 @media screen and (max-width: 494px) {
-                 .mobileView {
-                     display: block;
-                     height: calc(91vh - 100px);
-                     overflow-y: auto;
-                 }
+    .mobileView {
+        display: block;
+        height: calc(91dvh - 100px);
+        overflow-y: auto;
+    }
+
+    .fullmobileView {
+        display: block;
+        height: calc(99dvh - 100px);
+        overflow-y: auto;
+    }
 }

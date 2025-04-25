@@ -297,6 +297,7 @@ const MainComponent = (props: any) => {
       setIsLoader(false);
       setIsCompleted(isCompleted);
       setIsAdmin(isMember);
+      setFirst(0);
     } catch (error) {
       console.error(error);
     }
@@ -474,7 +475,7 @@ const MainComponent = (props: any) => {
       <p style={{ whiteSpace: "nowrap" }}>
         <span
           style={{
-            backgroundColor: getBGCode ? getBGCode : "#fff",
+            backgroundColor: getBGCode ? getBGCode : "#b4b4b4",
             color: "#fff",
             padding: "5px 10px",
             fontWeight: "500",
@@ -523,8 +524,16 @@ const MainComponent = (props: any) => {
                       title={value.text}
                       size={PersonaSize.size32}
                     />
-                    <p className="user-full-name" title={value.text}>
+                    <p
+                      className={`${
+                        users?.length > 1 ? "user-name" : "user-full-name"
+                      }`}
+                      title={value.text}
+                    >
                       {value.text}
+                      {users?.length > 1 && users?.length !== index + 1
+                        ? ", "
+                        : ""}
                     </p>
                   </div>
                 );
@@ -630,7 +639,10 @@ const MainComponent = (props: any) => {
 
   const dueDateBodyTemplate = (rowData: any) => {
     return (
-      <span style={{ fontSize: "13px" }}>
+      <span
+        style={{ fontSize: "13px" }}
+        title={formattedDate(rowData?.DueDate)}
+      >
         {formattedDate(rowData?.DueDate)}
       </span>
     );
@@ -644,6 +656,7 @@ const MainComponent = (props: any) => {
             expandCard === rowData?.Id ? "pi-angle-up" : "pi-angle-down"
           } expandIcon`}
           style={{ color: "slateblue", cursor: "pointer" }}
+          title="Expand/Collapse"
           onClick={() =>
             setExpandCard(expandCard === rowData?.Id ? null : rowData?.Id)
           }
@@ -651,12 +664,14 @@ const MainComponent = (props: any) => {
         <i
           className="pi pi-eye"
           style={{ color: "slateblue", cursor: "pointer" }}
+          title="View"
           onClick={() => onOpenForm(rowData, "View")}
         />
         {rowData?.Progress.toLowerCase() !== "completed" && (
           <i
             className="pi pi-file-edit"
             style={{ color: "slateblue", cursor: "pointer" }}
+            title="Edit"
             onClick={() => onOpenForm(rowData, "Edit")}
           />
         )}
@@ -664,6 +679,7 @@ const MainComponent = (props: any) => {
           <i
             className="pi pi-image"
             style={{ color: "slateblue", cursor: "pointer" }}
+            title="Attachments"
             onClick={() => getAttachments(rowData?.Id)}
           />
         )}
@@ -768,7 +784,7 @@ const MainComponent = (props: any) => {
                   }}
                   severity="success"
                   size="small"
-                  label={`${isCompleted ? "Ongoing tasks" : "Completed tasks"}`}
+                  label={`${isCompleted ? "Ongoing Tasks" : "Completed Tasks"}`}
                   onClick={() => getUserBasedGroups(!isCompleted)}
                 />
               )}
@@ -789,6 +805,7 @@ const MainComponent = (props: any) => {
             setFirst={setFirst}
             handleSortByDate={handleSortByDate}
             handleSortByLocation={handleSortByLocation}
+            getUserBasedGroups={getUserBasedGroups}
             isCompleted={isCompleted}
           />
           <div className={styles.desktopView}>
@@ -846,7 +863,7 @@ const MainComponent = (props: any) => {
                   style={{ width: "10%", cursor: "pointer" }}
                   onClick={() => handleSortByDate(allTasksList || [], "click")}
                 >
-                  <p>Due Date</p>
+                  <p>Due date</p>
                   <i
                     className={`${
                       sortState?.Date === 0
@@ -888,6 +905,7 @@ const MainComponent = (props: any) => {
                         fontWeight: "500",
                       }}
                       className={styles.taskTitle}
+                      title={rowData?.Title}
                     >
                       {rowData.Title}
                     </div>
@@ -987,7 +1005,7 @@ const MainComponent = (props: any) => {
                 <Column
                   style={{ width: "10%" }}
                   field="DueDate"
-                  header="Due Date"
+                  header="Due date"
                   body={dueDateBodyTemplate}
                 ></Column>
                 <Column
@@ -1151,18 +1169,6 @@ const MainComponent = (props: any) => {
                         </span>
                       </p>
                     </p>
-                    {/* <div style={{ display: "flex", gap: "20px" }}>
-                      <i
-                        className="pi pi-eye"
-                        style={{ color: "slateblue", cursor: "pointer" }}
-                        onClick={() => onOpenForm(task, "View")}
-                      ></i>
-                      <i
-                        className="pi pi-file-edit"
-                        style={{ color: "slateblue", cursor: "pointer" }}
-                        onClick={() => onOpenForm(task, "Edit")}
-                      ></i>
-                    </div> */}
                     {actionBodyTemplate(task)}
                   </div>
                 </div>

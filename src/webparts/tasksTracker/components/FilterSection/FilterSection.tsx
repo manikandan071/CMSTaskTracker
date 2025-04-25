@@ -41,6 +41,7 @@ interface FilterSectionProps {
   setFirst: React.Dispatch<React.SetStateAction<any | undefined>>;
   handleSortByDate: any;
   handleSortByLocation: any;
+  getUserBasedGroups: any;
   isCompleted: boolean;
 }
 
@@ -50,6 +51,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   setFirst,
   handleSortByDate,
   handleSortByLocation,
+  getUserBasedGroups,
   isCompleted,
 }) => {
   const priorityOptions = [
@@ -269,11 +271,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 }
               />
               <i
-                className="pi pi-refresh refresh-icon"
+                className="pi pi-filter-slash refresh-icon"
                 style={{
                   fontSize: "1.0rem",
                   color: "#fff",
-                  background: "#e05a5a",
+                  background: "#c86565",
                   alignSelf: "center",
                   padding: "7px",
                   borderRadius: "5px",
@@ -281,6 +283,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 }}
                 title="Clear filter"
                 onClick={() => serachAndFilterFunction("", "Clear")}
+              />
+              <i
+                className="pi pi-sync"
+                style={{
+                  fontSize: "1.0rem",
+                  color: "#fff",
+                  background: "#6c757d",
+                  alignSelf: "center",
+                  padding: "7px",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+                title="Page refresh"
+                onClick={() => getUserBasedGroups(isCompleted)}
               />
             </div>
           </div>
@@ -297,20 +313,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           }
         />
         <i
-          className="pi pi-refresh"
-          style={{
-            fontSize: "1.0rem",
-            color: "#fff",
-            background: "#e05a5a",
-            alignSelf: "center",
-            padding: "7px",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-          title="Clear filter"
-          onClick={() => serachAndFilterFunction("", "Clear")}
-        />
-        <i
           className="pi pi-bars"
           style={{
             fontSize: "1.0rem",
@@ -321,7 +323,36 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             borderRadius: "5px",
             cursor: "pointer",
           }}
+          title="Filters"
           onClick={() => setIsFilterPanelOpen(true)}
+        />
+        <i
+          className="pi pi-filter-slash"
+          style={{
+            fontSize: "1.0rem",
+            color: "#fff",
+            background: "#c86565",
+            alignSelf: "center",
+            padding: "7px",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+          title="Clear filter"
+          onClick={() => serachAndFilterFunction("", "Clear")}
+        />
+        <i
+          className="pi pi-sync"
+          style={{
+            fontSize: "1.0rem",
+            color: "#fff",
+            background: "#6c757d",
+            alignSelf: "center",
+            padding: "7px",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+          title="Page refresh"
+          onClick={() => getUserBasedGroups(isCompleted)}
         />
       </div>
       {/* <Panel

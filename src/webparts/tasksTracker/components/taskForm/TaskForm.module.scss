@@ -6,8 +6,9 @@
     background-color: #6e777f;
     padding: 0px 20px;
 }
-.hideSection{
-    display: none!important;
+
+.hideSection {
+    display: none !important;
 }
 
 .dialogContainer {
@@ -16,6 +17,7 @@
     width: 100%;
     padding: 10px 20px;
     background-color: #fff;
+
     @media screen and (max-width: 770px) {
         .sectionWrapper {
             width: 100%;
@@ -34,7 +36,6 @@
                 }
             }
         }
-
     }
 
     @media screen and (min-width: 770px) and (max-width: 1024px) {
@@ -55,14 +56,14 @@
                 }
             }
         }
-
     }
 
     @media screen and (min-width: 1025px) {
         .sectionWrapper {
             width: 50%;
             padding: 0px 20px;
-            .halfSection{
+
+            .halfSection {
                 width: 50%;
             }
 
@@ -80,63 +81,67 @@
             }
         }
     }
+
     @media screen and (max-width: 770px) {
         .halfSectionWrapper {
-        width: 50%;
-        padding: 5px;
+            width: 50%;
+            padding: 5px;
 
-        .sectionControl {
-            display: flex;
-            width: 100%;
-            flex-wrap: wrap;
+            .sectionControl {
+                display: flex;
+                width: 100%;
+                flex-wrap: wrap;
 
-            .sectionLabel {
-                width: 90%;
-                font-size: 14px;
-                margin: 5px 0px;
-                font-weight: 500;
+                .sectionLabel {
+                    width: 90%;
+                    font-size: 14px;
+                    margin: 5px 0px;
+                    font-weight: 500;
+                }
             }
         }
     }
-}
- @media screen and (min-width: 770px) and (max-width: 1024px) {
-     .halfSectionWrapper {
-         width: 25%;
-         padding: 5px;
 
-         .sectionControl {
-             display: flex;
-             width: 100%;
-             flex-wrap: wrap;
+    @media screen and (min-width: 770px) and (max-width: 1024px) {
+        .halfSectionWrapper {
+            width: 25%;
+            padding: 5px;
 
-             .sectionLabel {
-                 width: 90%;
-                 font-size: 14px;
-                 margin: 5px 0px;
-                 font-weight: 500;
-             }
-         }
-     }
- }
-  @media screen and (min-width: 1025px) {
-      .halfSectionWrapper {
-          width: 25%;
-          padding: 5px;
+            .sectionControl {
+                display: flex;
+                width: 100%;
+                flex-wrap: wrap;
 
-          .sectionControl {
-              display: flex;
-              width: 100%;
-              flex-wrap: wrap;
+                .sectionLabel {
+                    width: 90%;
+                    font-size: 14px;
+                    margin: 5px 0px;
+                    font-weight: 500;
+                }
+            }
+        }
+    }
 
-              .sectionLabel {
-                  width: 90%;
-                  font-size: 14px;
-                  margin: 5px 0px;
-                  font-weight: 500;
-              }
-          }
-      }
-  }
+    @media screen and (min-width: 1025px) {
+        .halfSectionWrapper {
+            width: 25%;
+            padding: 5px;
+
+            .sectionControl {
+                display: flex;
+                width: 100%;
+                flex-wrap: wrap;
+
+                .sectionLabel {
+                    width: 90%;
+                    font-size: 14px;
+                    margin: 5px 0px;
+                    font-weight: 500;
+                }
+            }
+        }
+    }
+
     .fullSectionWrapper {
         width: 100%;
         padding: 5px 20px;
@@ -154,25 +159,26 @@
             }
         }
     }
-         @media screen and (max-width: 770px) {
-            .fullSectionWrapper {
-                    width: 100%;
-                    padding: 5px;
-            
-                    .sectionControl {
-                        display: flex;
-                        width: 100%;
-                        flex-wrap: wrap;
-            
-                        .sectionLabel {
-                            width: 90%;
-                            font-size: 14px;
-                            margin: 5px 0px;
-                            font-weight: 500;
-                        }
-                    }
+
+    @media screen and (max-width: 770px) {
+        .fullSectionWrapper {
+            width: 100%;
+            padding: 5px;
+
+            .sectionControl {
+                display: flex;
+                width: 100%;
+                flex-wrap: wrap;
+
+                .sectionLabel {
+                    width: 90%;
+                    font-size: 14px;
+                    margin: 5px 0px;
+                    font-weight: 500;
                 }
-         }
+            }
+        }
+    }
 }
 
 .dialogLoader {
@@ -200,21 +206,22 @@ input[type="file"] {
     font-size: 14px;
 }
 
-
 .attachmentUploader {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
+
     input[type="file"] {
         margin-bottom: 1rem;
     }
-        .attachmentsBtnSection {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
+
+    .attachmentsBtnSection {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
 
     .imageList {
         width: 80%;
@@ -234,7 +241,7 @@ input[type="file"] {
     }
 
     .imageCard {
-        width: 23%;
+        width: 22%;
         background: #f9f9f9;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -250,7 +257,7 @@ input[type="file"] {
                 height: 90px;
                 object-fit: cover;
                 border-radius: 8px;
-                cursor: pointer!important;
+                cursor: pointer !important;
                 transition: transform 0.2s ease-in-out;
             }
 
@@ -290,35 +297,39 @@ input[type="file"] {
             font-size: 12px;
         }
     }
+
+    .footerSection {
+        width: 20%;
+        display: flex;
+        gap: 10px;
+        justify-content: end;
+        align-items: end;
+        margin: 10px 0px;
+    }
+
+    @media screen and (max-width: 770px) {
+        .imageList {
+            width: 100%;
+            height: 127px;
+            overflow: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
         .footerSection {
-            width: 20%;
+            width: 100%;
             display: flex;
             gap: 10px;
             justify-content: end;
             align-items: end;
             margin: 10px 0px;
         }
-                @media screen and (max-width: 770px) {
-                .imageList {
-                        width: 100%;
-                        height: 127px;
-                        overflow: auto;
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 1rem;
-                    }
-                                        .footerSection {
-                                            width: 100%;
-                                            display: flex;
-                                            gap: 10px;
-                                            justify-content: end;
-                                            align-items: end;
-                                            margin: 10px 0px;
-                                        }
-                    .imageCard{
-                        width: 29%;
-                    }
-                }
+
+        .imageCard {
+            width: 29%;
+        }
+    }
 }
 
 // webcam styles
