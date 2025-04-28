@@ -5,6 +5,10 @@
 .p-button {
     font-weight: 500 !important;
 }
+.p-disabled,
+.p-component:disabled{
+    opacity: 1 !important;
+}
 
 /* .p-dialog{
     width: 65vw!important;
@@ -209,12 +213,20 @@
     overflow: auto;
     background-color: #fff;
 }
+.taskTitle {
+    margin: 0px !important;
+    height: 40px;
+    overflow: auto;
+    font-size: 14px;
+}
 
 @media (max-width: 770px) {
     .expandIcon {
         display: inline-block !important;
     }
-
+    .taskTitle{
+        height: auto !important;
+    }
     .taskFormContainer {
         height: auto !important;
         background-color: #fff;

@@ -707,23 +707,33 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 <label className={styles.sectionLabel} htmlFor="taskTitle">
                   Task Title <span style={{ color: "red" }}>*</span>
                 </label>
-                <InputText
-                  disabled={
-                    formData?.TaskType === "View" || !formData?.recOwner
-                      ? true
-                      : false
-                  }
-                  value={formData?.Title}
-                  onChange={(e) =>
-                    formOnChange(
-                      capitalizeFirstLetter(e.target.value.trimStart()),
-                      "Title"
-                    )
-                  }
-                  id="taskTitle"
-                  aria-describedby="username-help"
-                  placeholder="Enter here"
-                />
+                {formData?.TaskType !== "View" ? (
+                  <InputText
+                    disabled={
+                      formData?.TaskType === "View" || !formData?.recOwner
+                        ? true
+                        : false
+                    }
+                    value={formData?.Title}
+                    onChange={(e) =>
+                      formOnChange(
+                        capitalizeFirstLetter(e.target.value.trimStart()),
+                        "Title"
+                      )
+                    }
+                    id="taskTitle"
+                    aria-describedby="username-help"
+                    placeholder="Enter here"
+                  />
+                ) : (
+                  <p
+                    className="taskTitle"
+                    // style={{ margin: "0px", height: "40px", overflow: "auto" }}
+                    title={formData?.Title}
+                  >
+                    {formData?.Title}
+                  </p>
+                )}
                 <span className="errormsg">Please enter title</span>
               </div>
               <div
@@ -735,6 +745,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   Description
                 </label>
                 <InputTextarea
+                  title={formData?.Description}
                   disabled={
                     formData?.TaskType === "View" || !formData?.recOwner
                       ? true
@@ -772,22 +783,30 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 <label className={styles.sectionLabel} htmlFor="location">
                   Cemetery Location <span style={{ color: "red" }}>*</span>
                 </label>
-                <Dropdown
-                  disabled={
-                    formData?.TaskType === "View" || !formData?.recOwner
-                      ? true
-                      : false
-                  }
-                  id="location"
-                  value={formData?.CemeteryLocation}
-                  onChange={(e) => formOnChange(e.value, "CemeteryLocation")}
-                  options={cemeteryList}
-                  optionLabel="text"
-                  placeholder="Select a location"
-                  className="w-full md:w-14rem"
-                  checkmark={true}
-                  highlightOnSelect={false}
-                />
+                {formData?.TaskType !== "View" ? (
+                  <Dropdown
+                    disabled={
+                      formData?.TaskType === "View" || !formData?.recOwner
+                        ? true
+                        : false
+                    }
+                    id="location"
+                    value={formData?.CemeteryLocation}
+                    onChange={(e) => formOnChange(e.value, "CemeteryLocation")}
+                    options={cemeteryList}
+                    optionLabel="text"
+                    placeholder="Select a location"
+                    className="w-full md:w-14rem"
+                    checkmark={true}
+                    highlightOnSelect={false}
+                  />
+                ) : (
+                  <p
+                    style={{ height: "38px", margin: "0px", fontSize: "14px" }}
+                  >
+                    {formData?.CemeteryLocation?.text}
+                  </p>
+                )}
                 <span className="errormsg">Please select location</span>
               </div>
               <div
@@ -1162,6 +1181,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   Notes
                 </label>
                 <InputTextarea
+                  title={formData?.Notes}
                   disabled={formData?.TaskType === "View" ? true : false}
                   autoResize={false}
                   value={formData?.Notes}
