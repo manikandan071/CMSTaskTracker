@@ -10,21 +10,22 @@ import {
   // IBasePickerSuggestionsProps,
   NormalPeoplePicker,
 } from "@fluentui/react/lib/Pickers";
-import { Panel } from "@fluentui/react";
+import { Panel, Persona, PersonaSize } from "@fluentui/react";
 import { useEffect, useRef, useState } from "react";
 import { graph } from "@pnp/graph";
-// import { sp } from "@pnp/sp";
 import { Web } from "@pnp/sp/webs";
 import { Button } from "primereact/button";
 import Webcam from "react-webcam";
-
 import styles from "./TaskForm.module.scss";
-import PreviewImages from "../PreviewImages/PreViewImages";
 import { Toast } from "primereact/toast";
 import { Calendar } from "primereact/calendar";
 import { app, media } from "@microsoft/teams-js";
 import CustomLoader from "../CustomLoader/CustomLoader";
 import "./taskForm.css";
+import moment from "moment";
+import { Dialog } from "primereact/dialog";
+import MediaPreview from "../MediaPreview/MediaPreview";
+import useScreenSize from "../DataTable/ScreenSize";
 
 interface taskDetails {
   Title: string;
@@ -51,11 +52,13 @@ interface formDataDetails {
   Title?: string;
   Description?: string;
   Notes?: string;
+  PreNotes?: string;
   CemeteryLocationId?: number;
   CemeteryLocation?: any;
   GroupName?: string;
   Priority?: any;
   Progress?: any;
+  PreProgress?: any;
   StartDate?: any;
   DueDate?: any;
   Id?: any;
@@ -64,6 +67,7 @@ interface formDataDetails {
   TaskType?: string;
   isValid?: boolean;
   recOwner?: boolean;
+  reOpenComments?: string;
 }
 interface TaskFormProps {
   webPartProps: any;
@@ -89,12 +93,13 @@ const TaskForm: React.FC<TaskFormProps> = ({
   setShowToast,
 }) => {
   // development site
-  // const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
+  const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
 
   // production site
-  const listWeb = Web(
-    "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
-  );
+  // const listWeb = Web(
+  //   "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
+  // );
+  const screenType = useScreenSize();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const webcamRef = useRef<Webcam>(null);
   const toast = useRef<Toast>(null);
@@ -107,14 +112,21 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const progressOptions = [
     { key: "Not started", text: "Not started" },
     { key: "In progress", text: "In progress" },
-    { key: "Completed", text: "Completed" },
+    { key: "Job completed", text: "Job completed" },
   ];
+  // const completeProgressOptions = [
+  //   { key: "Reopen", text: "Reopen" },
+  //   { key: "Completed", text: "Completed" },
+  // ];
 
   // React States
 
   const [formData, setFormData] = useState<formDataDetails>();
+  const [allNotes, setAllNotes] = useState<any[]>();
   const [dialogLoader, setDialogLoader] = useState<boolean>(false);
+  const [reopenComments, setReopenComments] = useState<boolean>(false);
   const [showCamera, setShowCamera] = useState<boolean>(false);
+  const [showAllNotes, setShowAllNotes] = useState<boolean>(false);
   const [imagePreview, setImagePreview] = useState<boolean>(false);
   const [previewImageIndex, setPreviewImageIndex] = useState<number>(0);
   const [cemeteryList, setCemeteryList] = useState<dropDownOptions[]>();
@@ -123,6 +135,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
   >([]);
   const [images, setImages] = useState<any[]>([]);
   const [isInTeams, setIsInTeams] = useState(true);
+  console.log("allNotes", allNotes, formData);
 
   const onFilterChanged = (filterText: string) => {
     return filterText
@@ -136,32 +149,72 @@ const TaskForm: React.FC<TaskFormProps> = ({
     const files = Array.from(event.target.files);
     const existingFileNames = images.map((img: any) => img.name.toLowerCase());
 
-    // Filter out duplicate files
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/heic",
+      "image/heif",
+      "image/avif",
+      "application/pdf",
+    ];
+
+    const allowedExtensions = [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".heic",
+      ".heif",
+      ".webp",
+      ".bmp",
+      ".gif",
+      ".svg",
+      ".tiff",
+      ".avif",
+      ".pdf",
+    ];
+
     const newFiles = files.filter((file: any) => {
-      const isDuplicate = existingFileNames.includes(file.name.toLowerCase());
-      if (isDuplicate) {
-        toast.current &&
-          toast.current.show({
-            severity: "warn",
-            summary: "Warning",
-            detail: `File ${file.name} is already uploaded.`,
-            life: 3000,
-          });
+      const fileName = file.name.toLowerCase();
+      const fileType = file.type;
+      const fileExtension = fileName.slice(fileName.lastIndexOf("."));
+
+      const isDuplicate = existingFileNames.includes(fileName);
+      const isAllowedType = allowedMimeTypes.includes(fileType);
+      const isAllowedExtension = allowedExtensions.includes(fileExtension);
+
+      if (!isAllowedType && !isAllowedExtension) {
+        toast?.current?.show({
+          severity: "warn",
+          summary: "Unsupported File",
+          detail: `File ${file.name} is not a supported type.`,
+          life: 3000,
+        });
+        return false;
       }
-      return !isDuplicate; // Only return non-duplicate files
+
+      if (isDuplicate) {
+        toast?.current?.show({
+          severity: "warn",
+          summary: "Duplicate File",
+          detail: `File ${file.name} is already uploaded.`,
+          life: 3000,
+        });
+        return false;
+      }
+
+      return true;
     });
 
     if (newFiles.length > 0) {
       const newImages = newFiles.map((file: any) => ({
         id: file.name + Date.now(),
         url: URL.createObjectURL(file),
-        file: file,
+        file,
         name: file.name,
       }));
 
-      setImages([...images, ...newImages]); // Add to state
+      setImages([...images, ...newImages]);
 
-      // Reset file input so the same file can be reselected
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -274,13 +327,12 @@ const TaskForm: React.FC<TaskFormProps> = ({
     for (const user of items) {
       const email = user.secondaryText.toLowerCase();
       if (seen.has(email)) {
-        toast.current &&
-          toast.current.show({
-            severity: "warn",
-            summary: "Warning",
-            detail: `User ${user?.text} already added`,
-            life: 3000,
-          });
+        toast?.current?.show({
+          severity: "warn",
+          summary: "Warning",
+          detail: `User ${user?.text} already added`,
+          life: 3000,
+        });
         return;
       }
       seen.add(email);
@@ -307,7 +359,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
 
   // Function for task form submit
 
-  const taskSubmissionFunction = async (isNew: boolean) => {
+  const taskSubmissionFunction = async (
+    isNew: boolean,
+    tempFormData: formDataDetails
+  ) => {
     const isValid = formValidation();
     if (!isValid) {
       return;
@@ -317,22 +372,25 @@ const TaskForm: React.FC<TaskFormProps> = ({
       const user = await listWeb.currentUser.get();
       const userIds: any[] = [];
       await Promise.all(
-        (formData?.AssignedTo || []).map(async (user: any) => {
+        (tempFormData?.AssignedTo || []).map(async (user: any) => {
           await listWeb.ensureUser(user?.secondaryText).then((user: any) => {
             userIds.push(user?.data?.Id);
           });
         })
       );
       const payload = {
-        Title: formData?.Title,
-        Description: formData?.Description,
-        CemeteryLocationId: formData?.CemeteryLocationId,
+        Title: tempFormData?.Title,
+        Description: tempFormData?.Description,
+        CemeteryLocationId: tempFormData?.CemeteryLocationId,
         AssignedTo0Id: { results: userIds },
-        Priority: formData?.Priority,
-        Progress: formData?.Progress,
-        StartDate: new Date(formData?.StartDate),
-        DueDate: new Date(formData?.DueDate),
-        Notes: formData?.Notes,
+        Priority: tempFormData?.Priority,
+        Progress:
+          tempFormData?.Progress.toLowerCase() === "reopen"
+            ? "In progress"
+            : tempFormData?.Progress,
+        StartDate: new Date(tempFormData?.StartDate),
+        DueDate: new Date(tempFormData?.DueDate),
+        Notes: tempFormData?.Notes,
       };
       if (isNew) {
         const res = await listWeb.lists
@@ -346,25 +404,39 @@ const TaskForm: React.FC<TaskFormProps> = ({
             .items.getById(itemId)
             .attachmentFiles.add(file.name, file.file);
         }
+        const notePayload = {
+          Note: tempFormData?.Notes,
+          CurrentStatus: tempFormData?.Progress,
+          TaskOfId: itemId,
+        };
+        if (
+          tempFormData?.Notes?.trimStart() !== "" &&
+          tempFormData?.Notes !== tempFormData?.PreNotes
+        ) {
+          await listWeb.lists.getByTitle("AllNotes").items.add(notePayload);
+        }
         const tempObject = {
           Id: itemId,
-          Title: formData?.Title,
-          Description: formData?.Description,
-          CemeteryLocation: formData?.CemeteryLocation?.text,
-          CemeteryLocationId: formData?.CemeteryLocationId,
-          GroupName: formData?.GroupName,
-          AssignedTo: formData?.AssignedTo,
+          Title: tempFormData?.Title,
+          Description: tempFormData?.Description,
+          CemeteryLocation: tempFormData?.CemeteryLocation?.text,
+          CemeteryLocationId: tempFormData?.CemeteryLocationId,
+          GroupName: tempFormData?.GroupName,
+          AssignedTo: tempFormData?.AssignedTo,
           AssignedBy: [
             {
               text: user?.Title,
               secondaryText: user?.Email,
             },
           ],
-          Priority: formData?.Priority,
-          Progress: formData?.Progress,
-          StartDate: formData?.StartDate,
-          DueDate: formData?.DueDate,
-          Notes: formData?.Notes,
+          Priority: tempFormData?.Priority,
+          Progress:
+            tempFormData?.Progress.toLowerCase() === "reopen"
+              ? "In progress"
+              : tempFormData?.Progress,
+          StartDate: tempFormData?.StartDate,
+          DueDate: tempFormData?.DueDate,
+          Notes: tempFormData?.Notes,
           recOwner: true,
           isAttachment: images?.length > 0 ? true : false,
         };
@@ -384,14 +456,16 @@ const TaskForm: React.FC<TaskFormProps> = ({
           life: 3000,
         });
       } else {
+        console.log("form submit", tempFormData);
+
         listWeb.lists
           .getByTitle("AllTasks")
-          .items.getById(formData?.Id)
+          .items.getById(tempFormData?.Id)
           .update(payload)
           .then(async (res: any) => {
             const existingAttachments = await listWeb.lists
               .getByTitle("AllTasks")
-              .items.getById(formData?.Id)
+              .items.getById(tempFormData?.Id)
               .attachmentFiles();
             for (const attachment of existingAttachments) {
               if (
@@ -399,7 +473,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
               ) {
                 await listWeb.lists
                   .getByTitle("AllTasks")
-                  .items.getById(formData?.Id)
+                  .items.getById(tempFormData?.Id)
                   .attachmentFiles.getByName(attachment.FileName)
                   .delete();
               }
@@ -415,44 +489,98 @@ const TaskForm: React.FC<TaskFormProps> = ({
               ) {
                 await listWeb.lists
                   .getByTitle("AllTasks")
-                  .items.getById(formData?.Id)
+                  .items.getById(tempFormData?.Id)
                   .attachmentFiles.add(image.name, image.file);
               }
             }
+            const notePayload = {
+              Note: tempFormData?.Notes,
+              CurrentStatus: tempFormData?.Progress,
+              TaskOfId: tempFormData?.Id,
+            };
+            const reOpenNotesPayload = {
+              Note: tempFormData?.reOpenComments,
+              CurrentStatus: tempFormData?.Progress,
+              TaskOfId: tempFormData?.Id,
+              reOpenComment: true,
+            };
+            if (
+              tempFormData?.Notes?.trimStart() !== "" &&
+              tempFormData?.Notes !== tempFormData?.PreNotes
+            ) {
+              await listWeb.lists.getByTitle("AllNotes").items.add(notePayload);
+            }
+            if (tempFormData?.reOpenComments?.trimStart() !== "") {
+              await listWeb.lists
+                .getByTitle("AllNotes")
+                .items.add(reOpenNotesPayload);
+            }
             const tempObject = {
-              Id: formData?.Id,
-              Title: formData?.Title,
-              Description: formData?.Description,
-              CemeteryLocation: formData?.CemeteryLocation?.text,
-              CemeteryLocationId: formData?.CemeteryLocationId,
-              GroupName: formData?.GroupName,
-              AssignedTo: formData?.AssignedTo,
-              AssignedBy: formData?.AssignedBy,
-              Priority: formData?.Priority,
-              Progress: formData?.Progress,
-              StartDate: formData?.StartDate,
-              DueDate: formData?.DueDate,
-              Notes: formData?.Notes,
-              recOwner: formData?.recOwner,
+              Id: tempFormData?.Id,
+              Title: tempFormData?.Title,
+              Description: tempFormData?.Description,
+              CemeteryLocation: tempFormData?.CemeteryLocation?.text,
+              CemeteryLocationId: tempFormData?.CemeteryLocationId,
+              GroupName: tempFormData?.GroupName,
+              AssignedTo: tempFormData?.AssignedTo,
+              AssignedBy: tempFormData?.AssignedBy,
+              Priority: tempFormData?.Priority,
+              Progress:
+                tempFormData?.Progress.toLowerCase() === "reopen"
+                  ? "In progress"
+                  : tempFormData?.Progress,
+              StartDate: tempFormData?.StartDate,
+              DueDate: tempFormData?.DueDate,
+              Notes: tempFormData?.Notes,
+              recOwner: tempFormData?.recOwner,
               isAttachment: images?.length > 0 ? true : false,
             };
-            setDialogLoader(false);
             setAllTasksList((prevTasks: any) =>
               prevTasks
-                .map((task: any) =>
-                  task.Id === formData?.Id ? tempObject : task
-                )
-                .sort((a: any, b: any) => b.Id - a.Id)
+                .filter((task: any) => {
+                  // If ID matches and progress is 'Completed' → remove it
+                  if (
+                    task.Id === tempFormData?.Id &&
+                    tempFormData?.Progress.toLowerCase() === "completed"
+                  ) {
+                    return false;
+                  }
+                  return true; // Keep all others
+                })
+                .map((task: any) => {
+                  // If ID matches and it's NOT completed → update it
+                  if (task.Id === tempFormData?.Id) {
+                    return tempObject;
+                  }
+                  return task;
+                })
+                .sort((a: any, b: any) => b?.Id - a?.Id)
             );
+
             setMasterTasksList((prevTasks: any) =>
               prevTasks
-                .map((task: any) =>
-                  task.Id === formData?.Id ? tempObject : task
-                )
-                .sort((a: any, b: any) => b.Id - a.Id)
+                .filter((task: any) => {
+                  // If ID matches and progress is 'Completed' → remove it
+                  if (
+                    task.Id === tempFormData?.Id &&
+                    tempFormData?.Progress.toLowerCase() === "completed"
+                  ) {
+                    return false;
+                  }
+                  return true; // Keep all others
+                })
+                .map((task: any) => {
+                  // If ID matches and it's NOT completed → update it
+                  if (task.Id === tempFormData?.Id) {
+                    return tempObject;
+                  }
+                  return task;
+                })
+                .sort((a: any, b: any) => b?.Id - a?.Id)
             );
             setOpenForm(false);
             setImages([]);
+            setDialogLoader(false);
             setShowToast({
               severity: "success",
               summary: "Success",
@@ -467,6 +595,40 @@ const TaskForm: React.FC<TaskFormProps> = ({
     } catch (error) {
       console.log(error);
     }
+  };
+
+  // Function to fetch all notes
+  const getAllNotes = (id: any) => {
+    listWeb.lists
+      .getByTitle("AllNotes")
+      .items.filter(`TaskOf eq ${id}`)
+      .select("*,TaskOf/Id,Author/Id,Author/Title,Author/EMail")
+      .expand("TaskOf,Author")
+      .get()
+      .then((res: any) => {
+        console.log(res);
+        const tempArray: any[] = [];
+        res?.forEach((item: any) => {
+          const tempObj = {
+            Id: item.Id,
+            Note: item.Note,
+            CurrentStatus: item.CurrentStatus,
+            Autor: {
+              text: item?.Author?.Title,
+              secondaryText: item?.Author?.EMail,
+            },
+            createdDate: item?.Created,
+            reOpenComment: item?.reOpenComment ? true : false,
+          };
+          tempArray.push(tempObj);
+        });
+        console.log("tempArray", tempArray);
+
+        setAllNotes([...tempArray].reverse());
+      })
+      .catch((err: any) => {
+        console.log(err);
+      });
   };
 
   // Function for get task attchments
@@ -532,6 +694,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
     setFormData(initialData);
     setCemeteryList(userCemeteryList);
     if (initialData?.GroupName && initialData?.Id) {
+      getAllNotes(initialData?.Id);
       getAttachments(initialData?.Id);
       setGroupUsers(initialData.GroupName);
     } else {
@@ -543,7 +706,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
     if (window.parent !== window) {
       app.initialize().then(() => {
         app.getContext().then((context) => {
-          // Ready to use media
           setIsInTeams(true);
         });
       });
@@ -575,8 +737,12 @@ const TaskForm: React.FC<TaskFormProps> = ({
         return "#e67e22";
       case "in progress":
         return "#ffff00a3";
-      case "completed":
+      case "job completed":
         return "#2ecc71";
+      case "reopen":
+        return "#ffff00a3"; // orange yellow
+      case "completed":
+        return "#2ecc71"; // grey
       default:
         return "#fff";
     }
@@ -601,6 +767,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
         return "#e67e22";
       case "in progress":
         return "#ffff00a3";
+      case "job completed":
+        return "#2ecc71";
+      case "reopen":
+        return "#ffff00a3";
       case "completed":
         return "#2ecc71";
       default:
@@ -612,6 +782,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
       case "not started":
         return "#fff";
       case "in progress":
+        return "#000";
+      case "job completed":
+        return "#fff";
+      case "reopen":
         return "#000";
       case "completed":
         return "#fff";
@@ -651,6 +825,46 @@ const TaskForm: React.FC<TaskFormProps> = ({
     }
   };
 
+  function formatNoteDate(date: string | Date): string {
+    const inputDate = moment(date);
+    const now = moment();
+
+    if (inputDate.isSame(now, "day")) {
+      return `Today ${inputDate.format("hh:mm A")}`;
+    } else if (inputDate.isSame(now.clone().subtract(1, "day"), "day")) {
+      return `Yesterday ${inputDate.format("hh:mm A")}`;
+    } else {
+      return inputDate.format("MM/DD/YYYY hh:mm A");
+    }
+  }
+  const getVisibleProgressOptions = () => {
+    // const progress = formData?.Progress?.toLowerCase();
+    // const isOwner = !!formData?.recOwner;
+
+    // if (isOwner) {
+    //   if (
+    //     progress === "job completed" ||
+    //     progress === "reopen" ||
+    //     progress === "completed"
+    //   ) {
+    //     // Show only Reopen and Close options for recOwner when task is completed or already reopened/closed
+    //     return completeProgressOptions;
+    //   }
+    // }
+
+    // if (!isOwner) {
+    //   if (progress === "completed") {
+    //     // Regular user can only see Completed once done
+    //     return progressOptions.filter(
+    //       (opt: any) => opt.key.toLowerCase() === "completed"
+    //     );
+    //   }
+    // }
+
+    // Default: show regular progress options
+    return progressOptions;
+  };
+
   return (
     <div className="taskFormContainer">
       <Toast ref={toast} />
@@ -665,10 +879,15 @@ const TaskForm: React.FC<TaskFormProps> = ({
       ) : (
         <>
           {imagePreview && (
-            <PreviewImages
-              imagesData={images}
-              imageIndex={previewImageIndex}
-              setImagePreview={setImagePreview}
+            // <PreviewImages
+            //   imagesData={images}
+            //   imageIndex={previewImageIndex}
+            //   setImagePreview={setImagePreview}
+            // />
+            <MediaPreview
+              mediaList={images}
+              initialIndex={previewImageIndex}
+              onClose={setImagePreview}
             />
           )}
           <div className={styles.formHeader}>
@@ -1083,17 +1302,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   <label className={styles.sectionLabel} htmlFor="progress">
                     Progress
                   </label>
-                  {/* {formData?.Progress && (
-                    <ChoiceGroup
-                      disabled={formData?.TaskType === "Edit" ? false : true}
-                      selectedKey={formData?.Progress}
-                      // defaultSelectedKey={formData?.Progress}
-                      options={progressOptions}
-                      onChange={(key: any, option) => {
-                        formOnChange(option?.key, "Progress");
-                      }}
-                    />
-                  )} */}
                   <div
                     style={{
                       display: "flex",
@@ -1101,76 +1309,120 @@ const TaskForm: React.FC<TaskFormProps> = ({
                       marginBottom: "10px",
                     }}
                   >
-                    {progressOptions?.map((option: any, index: number) => {
-                      return (
-                        <div
-                          key={index}
-                          className="optionSection"
-                          style={{
-                            cursor:
-                              formData?.TaskType !== "View"
-                                ? "pointer"
-                                : "not-allowed",
-                            backgroundColor: getProgressBGColor(
-                              formData?.Progress === option?.key
-                                ? option?.key
-                                : "none"
-                            ),
-                            border: `1px solid ${getProgressBorderColor(
-                              formData?.Progress === option?.key
-                                ? option?.key
-                                : "none"
-                            )}`,
-                            color: `${getProgressColor(
-                              formData?.Progress === option?.key
-                                ? option?.key
-                                : "none"
-                            )}`,
-                            padding: "2px 10px 4px 10px",
-                            borderRadius: "50px",
-                            boxShadow:
-                              formData?.Progress === option?.key
+                    {getVisibleProgressOptions().map(
+                      (option: any, index: number) => {
+                        const isSelected = formData?.Progress === option?.key;
+                        const keyLower = option?.key.toLowerCase();
+
+                        return (
+                          <div
+                            key={index}
+                            className="optionSection"
+                            style={{
+                              cursor:
+                                formData?.TaskType !== "View"
+                                  ? "pointer"
+                                  : "not-allowed",
+                              backgroundColor: getProgressBGColor(
+                                isSelected
+                                  ? option?.key
+                                  : formData?.Progress?.toLowerCase() ===
+                                      "completed" &&
+                                    option?.key?.toLowerCase() ===
+                                      "job completed"
+                                  ? "job completed"
+                                  : "none"
+                              ),
+                              border: `1px solid ${getProgressBorderColor(
+                                isSelected
+                                  ? option?.key
+                                  : formData?.Progress?.toLowerCase() ===
+                                      "completed" &&
+                                    option?.key?.toLowerCase() ===
+                                      "job completed"
+                                  ? "job completed"
+                                  : "none"
+                              )}`,
+                              color: getProgressColor(
+                                isSelected
+                                  ? option?.key
+                                  : formData?.Progress?.toLowerCase() ===
+                                      "completed" &&
+                                    option?.key?.toLowerCase() ===
+                                      "job completed"
+                                  ? "job completed"
+                                  : "none"
+                              ),
+                              padding: "2px 10px 4px 10px",
+                              borderRadius: "50px",
+                              boxShadow: isSelected
                                 ? "rgba(0, 0, 0, 0.35) 0px -50px 36px -28px inset"
                                 : "",
-                          }}
-                          onClick={() =>
-                            formData?.TaskType !== "View" &&
-                            formOnChange(option?.key, "Progress")
-                          }
-                        >
-                          {option?.key.toLowerCase() === "not started" ? (
-                            <i
-                              className="pi pi-ban"
-                              style={{ fontSize: "0.8rem", marginRight: "7px" }}
-                            />
-                          ) : option?.key.toLowerCase() === "in progress" ? (
-                            <i
-                              className={`pi ${
-                                formData?.Progress === option?.key
-                                  ? "pi-spin"
-                                  : ""
-                              } pi-spinner`}
-                              style={{ fontSize: "0.8rem", marginRight: "7px" }}
-                            />
-                          ) : option?.key.toLowerCase() === "completed" ? (
-                            <i
-                              className="pi pi-check-circle"
-                              style={{ fontSize: "0.8rem", marginRight: "7px" }}
-                            />
-                          ) : (
-                            <></>
-                          )}
-                          <span
-                            style={{
-                              fontWeight:
-                                formData?.Progress === option?.key ? 500 : 400,
+                              textAlign: "center",
                             }}
+                            onClick={() =>
+                              formData?.TaskType !== "View" &&
+                              formOnChange(option?.key, "Progress")
+                            }
                           >
-                            {option?.key}
-                          </span>
-                        </div>
-                      );
-                    })}
+                            {/* Icons */}
+                            {keyLower === "not started" && (
+                              <i
+                                className="pi pi-ban"
+                                style={{
+                                  fontSize: "0.8rem",
+                                  marginRight: "7px",
+                                }}
+                              />
+                            )}
+                            {keyLower === "in progress" && (
+                              <i
+                                className={`pi ${
+                                  isSelected ? "pi-spin" : ""
+                                } pi-spinner`}
+                                style={{
+                                  fontSize: "0.8rem",
+                                  marginRight: "7px",
+                                }}
+                              />
+                            )}
+                            {keyLower === "job completed" && (
+                              <i
+                                className="pi pi-check"
+                                style={{
+                                  fontSize: "0.8rem",
+                                  marginRight: "7px",
+                                }}
+                              />
+                            )}
+                            {keyLower === "completed" && (
+                              <i
+                                className="pi pi-check-circle"
+                                style={{
+                                  fontSize: "0.8rem",
+                                  marginRight: "7px",
+                                }}
+                              />
+                            )}
+                            {keyLower === "reopen" && (
+                              <i
+                                className="pi pi-undo"
+                                style={{
+                                  fontSize: "0.8rem",
+                                  marginRight: "7px",
+                                }}
+                              />
+                            )}
+
+                            <span
+                              style={{ fontWeight: isSelected ? 500 : 400 }}
+                            >
+                              {option?.key}
+                            </span>
+                          </div>
+                        );
+                      }
+                    )}
                   </div>
                 </div>
               )}
@@ -1193,9 +1445,26 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   }
                   id="notes"
                   placeholder="Enter here"
-                  rows={formData?.TaskType === "New" ? 5 : 8}
+                  rows={formData?.TaskType === "New" ? 5 : 6}
                   cols={30}
                 />
+                {allNotes && allNotes?.length !== 0 && (
+                  <span
+                    style={{
+                      color: "#bc5656",
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      width: "100%",
+                      textAlign: "end",
+                      marginTop: "7px",
+                    }}
+                    onClick={() => setShowAllNotes(true)}
+                  >
+                    View all
+                  </span>
+                )}
               </div>
             </div>
             <div className={styles.fullSectionWrapper}>
@@ -1211,15 +1480,16 @@ const TaskForm: React.FC<TaskFormProps> = ({
                       </label>
                     )}
                     <input
-                      disabled={formData?.TaskType === "View" ? true : false}
+                      disabled={formData?.TaskType === "View"}
                       id="file-upload"
                       type="file"
                       ref={fileInputRef}
                       multiple
                       capture="environment"
-                      accept="image/*"
+                      accept="image/*,image/heic,image/heif,application/pdf"
                       onChange={handleFileUpload}
                     />
+
                     {formData?.TaskType !== "View" && (
                       <i
                         className="pi pi-camera"
@@ -1249,39 +1519,111 @@ const TaskForm: React.FC<TaskFormProps> = ({
                       images?.length === 0 ? "showImages" : ""
                     }`}
                   >
-                    {images.map((img, index) => (
-                      <div key={index} className={styles.imageCard}>
-                        <div className={styles.imgPreview}>
-                          <img
-                            src={img.url}
-                            alt={img.name}
-                            onClick={() => {
-                              setImagePreview(true);
-                              setPreviewImageIndex(index);
-                            }}
-                          />
-                          {formData?.TaskType !== "View" && (
-                            <button
-                              className={styles.deleteBtn}
-                              onClick={() => handleRemoveImage(index)}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                height="16"
-                                width="16"
-                                viewBox="0 0 24 24"
-                                fill="white"
+                    {images.map((img, index) => {
+                      const name = img.name?.toLowerCase();
+                      const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(
+                        name
+                      );
+                      const isPDF = /\.pdf$/i.test(name);
+                      const isDoc = /\.(docx?|xlsx?|pptx?)$/i.test(name);
+                      return (
+                        <div key={index} className={styles.imageCard}>
+                          <div className={styles.imgPreview}>
+                            {/* <img
+                              src={img.url}
+                              alt={img.name}
+                              onClick={() => {
+                                setImagePreview(true);
+                                setPreviewImageIndex(index);
+                              }}
+                            /> */}
+                            {isImage ? (
+                              <img
+                                src={img.url}
+                                alt={img.name}
+                                onClick={() => {
+                                  setImagePreview(true);
+                                  setPreviewImageIndex(index);
+                                }}
+                              />
+                            ) : isPDF ? (
+                              <div
+                                className={styles.fileBox}
+                                onClick={() => {
+                                  setImagePreview(true);
+                                  setPreviewImageIndex(index);
+                                }}
                               >
-                                <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
-                              </svg>
-                            </button>
-                          )}
+                                <img
+                                  src={require("../../../../images/pdf.png")}
+                                  alt="PDF"
+                                />
+                                {/* <a
+                                  href={img.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  link
+                                </a> */}
+                              </div>
+                            ) : isDoc ? (
+                              <div className={styles.fileBox}>
+                                <img
+                                  src={require("../../../../images/doc.png")}
+                                  alt="DOCX"
+                                />
+                                <a
+                                  href={img.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  link
+                                </a>
+                              </div>
+                            ) : (
+                              <div
+                                className={styles.fileBox}
+                                onClick={() => {
+                                  setImagePreview(true);
+                                  setPreviewImageIndex(index);
+                                }}
+                              >
+                                <img
+                                  src={require("../../../../images/paper.png")}
+                                  alt="File"
+                                />
+                                {/* <a
+                                  href={img.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  Download File
+                                </a> */}
+                              </div>
+                            )}
+                            {formData?.TaskType !== "View" && (
+                              <button
+                                className={styles.deleteBtn}
+                                onClick={() => handleRemoveImage(index)}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  height="16"
+                                  width="16"
+                                  viewBox="0 0 24 24"
+                                  fill="white"
+                                >
+                                  <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.89 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                          <div title={img.name} className={styles.imageName}>
+                            {img.name}
+                          </div>
                         </div>
-                        <div title={img.name} className={styles.imageName}>
-                          {img.name}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   {/* // ) : (
                   //   <div className="imageList-section" />
@@ -1300,22 +1642,66 @@ const TaskForm: React.FC<TaskFormProps> = ({
                       className="p-button-text"
                       size="small"
                     />
-                    {formData?.TaskType !== "View" && (
-                      <Button
-                        severity="secondary"
-                        disabled={dialogLoader}
-                        label={
-                          formData?.TaskType === "New" ? "Submit" : "Update"
-                        }
-                        icon="pi pi-check"
-                        onClick={() =>
-                          taskSubmissionFunction(
-                            formData?.TaskType === "New" ? true : false
-                          )
-                        }
-                        size="small"
-                      />
-                    )}
+                    {formData?.TaskType !== "View" &&
+                      formData?.PreProgress.toLowerCase() !==
+                        "job completed" && (
+                        <Button
+                          severity="secondary"
+                          disabled={dialogLoader}
+                          label={
+                            formData?.TaskType === "New" ? "Submit" : "Update"
+                          }
+                          icon="pi pi-check"
+                          onClick={() => {
+                            if (
+                              formData?.TaskType === "Edit" &&
+                              formData?.Progress?.toLowerCase() === "reopen" &&
+                              formData?.reOpenComments === ""
+                            ) {
+                              setReopenComments(true);
+                            } else {
+                              if (formData) {
+                                taskSubmissionFunction(
+                                  formData.TaskType === "New" ? true : false,
+                                  formData
+                                );
+                              }
+                            }
+                          }}
+                          size="small"
+                        />
+                      )}
+                    {formData?.TaskType !== "View" &&
+                      formData?.PreProgress.toLowerCase() ===
+                        "job completed" && (
+                        <Button
+                          label="Re-open"
+                          icon="pi pi-undo"
+                          severity="danger"
+                          disabled={dialogLoader}
+                          size="small"
+                          onClick={() => {
+                            setReopenComments(true);
+                          }}
+                        />
+                      )}
+                    {formData?.TaskType !== "View" &&
+                      formData?.PreProgress.toLowerCase() ===
+                        "job completed" && (
+                        <Button
+                          label="Completed"
+                          disabled={dialogLoader}
+                          icon="pi pi-check-circle"
+                          severity="success"
+                          size="small"
+                          onClick={() => {
+                            taskSubmissionFunction(false, {
+                              ...formData,
+                              Progress: "Completed",
+                            });
+                          }}
+                        />
+                      )}
                   </div>
                 </div>
               </div>
@@ -1377,6 +1763,207 @@ const TaskForm: React.FC<TaskFormProps> = ({
           </div>
         </div>
       </Panel>
+      {/* <Panel
+        isOpen={showAllNotes}
+        onDismiss={() => setShowAllNotes(false)}
+        headerText="All Notes"
+        isLightDismiss
+        isBlocking={false}
+        closeButtonAriaLabel="Close"
+        type={window.innerWidth < 600 ? 7 : 3}
+      > */}
+      <Dialog
+        header="Notes and comments"
+        visible={showAllNotes}
+        position={"right"}
+        style={{
+          width:
+            screenType === "mobile"
+              ? "90%"
+              : screenType === "tablet"
+              ? "70%"
+              : "50%",
+          height: "100%",
+        }}
+        onHide={() => {
+          if (!showAllNotes) return;
+          setShowAllNotes(false);
+        }}
+        draggable={false}
+        resizable={false}
+        closeOnEscape={true}
+        dismissableMask
+        className="notesDialog"
+      >
+        <div className="panelContainer">
+          {allNotes?.map((note: any, index: number) => {
+            return (
+              <div
+                key={index}
+                style={{
+                  padding: "10px 15px",
+                  border: `1px solid ${
+                    note?.reOpenComment ? "#e9baba" : "#e5e5e5"
+                  }`,
+                  marginTop: "10px",
+                  boxShadow: "#007bff33 0px 25px 20px -20px",
+                  borderRadius: "5px",
+                  background: note?.reOpenComment ? "#f4e3e3a8" : "#fff",
+                }}
+              >
+                {note?.reOpenComment && (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "start",
+                      fontSize: "13px",
+                      color: "#cd5050",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Re-open comments
+                  </div>
+                )}
+                <div style={{ padding: "8px 0px" }}>
+                  <span>{note?.Note}</span>
+                </div>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "3px",
+                      fontWeight: "600",
+                      fontSize: "13px",
+                      color: "#5e415b",
+                    }}
+                  >
+                    <Persona
+                      styles={{
+                        root: {
+                          margin: "0 !important;",
+                          // position: "absolute",
+                          borderRadius: "50%",
+                          border: "3px solidrgb(255, 255, 255)",
+                          height: "25px !important",
+                          ".ms-Persona-details": {
+                            display: "none",
+                          },
+                          ".ms-Persona-image": {
+                            width: "20px !important",
+                            height: "20px !important",
+                          },
+                          ".ms-Persona-imageArea": {
+                            width: "20px !important",
+                            height: "20px !important",
+                          },
+                        },
+                      }}
+                      imageUrl={
+                        "/_layouts/15/userphoto.aspx?size=S&username=" +
+                        note?.Autor?.secondaryText
+                      }
+                      title={note?.Autor?.text}
+                      size={PersonaSize.size24}
+                    />
+                    <span>{note?.Autor?.text}</span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "start",
+                      fontSize: "12px",
+                      color: "#5e415b",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {formatNoteDate(note?.createdDate)}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* </Panel> */}
+      </Dialog>
+      <Dialog
+        id="re_open_comments_dialog"
+        header="Re-Open Comments(optional)"
+        visible={reopenComments}
+        position={"center"}
+        style={{
+          width:
+            screenType === "mobile"
+              ? "90%"
+              : screenType === "tablet"
+              ? "70%"
+              : "50%",
+          height: "50%",
+        }}
+        onHide={() => {
+          if (!reopenComments) return;
+          setReopenComments(false);
+        }}
+        draggable={false}
+        resizable={false}
+        closeOnEscape={true}
+        dismissableMask
+        className="notesDialog"
+        footer={
+          <div>
+            <Button
+              severity="secondary"
+              disabled={dialogLoader}
+              label="Submit"
+              icon="pi pi-check"
+              onClick={() => {
+                setReopenComments(false);
+                taskSubmissionFunction(false, {
+                  ...formData,
+                  Progress: "In progress",
+                });
+              }}
+              size="small"
+            />
+          </div>
+        }
+      >
+        <div
+          className={`inputsection ${styles.sectionControl}`}
+          style={{ paddingTop: "10px" }}
+        >
+          <InputTextarea
+            title={formData?.reOpenComments}
+            disabled={formData?.TaskType === "View" ? true : false}
+            autoResize={true}
+            value={formData?.reOpenComments}
+            onChange={(e) =>
+              formOnChange(
+                capitalizeFirstLetter(e.target.value.trimStart()),
+                "reOpenComments"
+              )
+            }
+            id="reOpenComments"
+            placeholder="Enter here"
+            rows={formData?.TaskType === "New" ? 5 : 6}
+            cols={30}
+          />
+          <label
+            className={styles.sectionLabel}
+            htmlFor="taskTitle"
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              color: "#6a4848",
+              fontSize: "13px",
+            }}
+          >
+            This comment will be added to the Notes section.
+          </label>
+        </div>
+      </Dialog>
     </div>
   );
 };

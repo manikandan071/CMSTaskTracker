@@ -8,8 +8,8 @@
 
 .dot {
     position: absolute;
-    width: 5px;
-    height: 5px;
+    width: 7px;
+    height: 7px;
     background-color: #6e777f;
     /* 👈 your color */
     border-radius: 50%;

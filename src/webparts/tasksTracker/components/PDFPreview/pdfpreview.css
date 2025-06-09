@@ -1,0 +1,28 @@
+.pdf-preview{
+    /* width: 90%; */
+    height: 75vh;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+}
+
+@media (min-width: 1025px) {
+    .pdf-preview canvas {
+        width: 800px !important;
+        height: auto !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .pdf-preview canvas {
+        width: 600px !important;
+        height: auto !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .pdf-preview canvas {
+        width: 95vw !important;
+        height: auto !important;
+    }
+}

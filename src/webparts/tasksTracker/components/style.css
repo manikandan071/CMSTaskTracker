@@ -18,6 +18,22 @@
 .p-dialog .p-dialog-content {
     padding: 5px !important;
 }
+.notesDialog .p-dialog-content{
+    padding: 0px 20px 20px 20px !important;
+    background-color: #e6e2f2;
+}
+.notesDialog .p-dialog-header{
+    display: flex !important;
+    background-color: #e6e2f2;
+}
+.deletion_popup_section .p-dialog-header {
+    display: flex !important;
+    background-color: #ffffff;
+    padding: 5px;
+}
+.notesDialog .p-dialog-header .p-dialog-header-icon:focus-visible{
+    box-shadow: none !important;
+}
 
 .taskTableContainer {
     width: 100%;
@@ -281,6 +297,9 @@
     margin: 3px !important;
     color: #6e777f;
 }
+.p-paginator .p-disabled{
+    color: #dec8c8;
+}
 
 .p-paginator .p-highlight {
     background-color: #6e777f;
@@ -436,7 +455,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 75% !important;
+    width: 80% !important;
     font-weight: 500;
 }
 .user-name {
@@ -466,6 +485,9 @@
     /* .searchBox .p-dropdown,.searchBox .p-inputtext {
         width: 90px!important;
     } */
+    .deletion_popup_section{
+        width: 50% !important;
+    }
 }
 
 @media (max-width: 1220px) {
@@ -490,10 +512,13 @@
     } */
 }
 
-@media (max-width: 855px) {
+@media (max-width: 770px) {
     /* .searchBox .p-dropdown,.searchBox .p-inputtext {
         width: 100px!important;
     } */
+     .deletion_popup_section{
+        width: 80% !important;
+     }
 }
 
 @media (max-width: 404px) {
@@ -509,18 +534,18 @@
 }
 
 .imageList-section {
-    width: 80%;
+    width: 50%;
     height: 127px;
 }
 
 @media (min-width: 770px) and (max-width: 1100px) {
     .imageList-section {
-        width: 70% !important;
+        width: 50% !important;
         height: 127px;
     }
 
     .formFooter-section {
-        width: 30% !important;
+        width: 50% !important;
     }
 }
 
