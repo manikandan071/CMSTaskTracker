@@ -1320,7 +1320,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
                             className="optionSection"
                             style={{
                               cursor:
-                                formData?.TaskType !== "View"
+                                formData?.TaskType !== "View" &&
+                                (formData?.Progress?.toLowerCase() !==
+                                  "job completed" ||
+                                  !formData?.recOwner)
                                   ? "pointer"
                                   : "not-allowed",
                               backgroundColor: getProgressBGColor(
@@ -1362,6 +1365,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
                             }}
                             onClick={() =>
                               formData?.TaskType !== "View" &&
+                              formData?.TaskType !== "View" &&
+                              (formData?.Progress?.toLowerCase() !==
+                                "job completed" ||
+                                !formData?.recOwner) &&
                               formOnChange(option?.key, "Progress")
                             }
                           >
@@ -1672,8 +1679,8 @@ const TaskForm: React.FC<TaskFormProps> = ({
                         />
                       )}
                     {formData?.TaskType !== "View" &&
-                      formData?.PreProgress.toLowerCase() ===
-                        "job completed" && (
+                      formData?.PreProgress.toLowerCase() === "job completed" &&
+                      formData?.recOwner && (
                         <Button
                           label="Re-open"
                           icon="pi pi-undo"
@@ -1686,8 +1693,8 @@ const TaskForm: React.FC<TaskFormProps> = ({
                         />
                       )}
                     {formData?.TaskType !== "View" &&
-                      formData?.PreProgress.toLowerCase() ===
-                        "job completed" && (
+                      formData?.PreProgress.toLowerCase() === "job completed" &&
+                      formData?.recOwner && (
                         <Button
                           label="Completed"
                           disabled={dialogLoader}
@@ -1958,6 +1965,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
               justifyContent: "end",
               color: "#6a4848",
               fontSize: "13px",
+              fontWeight: 600,
             }}
           >
             This comment will be added to the Notes section.

@@ -613,14 +613,32 @@ const MainComponent = (props: any) => {
           title="View"
           onClick={() => onOpenForm(rowData, "View")}
         />
-        {rowData?.Progress.toLowerCase() !== "completed" && (
-          <i
-            className="pi pi-file-edit"
-            style={{ color: "slateblue", cursor: "pointer", fontSize: "14px" }}
-            title="Edit"
-            onClick={() => onOpenForm(rowData, "Edit")}
-          />
-        )}
+        {rowData?.Progress.toLowerCase() !== "completed" &&
+          (rowData?.Progress.toLowerCase() !== "job completed" ? (
+            <i
+              className="pi pi-file-edit"
+              style={{
+                color: "slateblue",
+                cursor: "pointer",
+                fontSize: "14px",
+              }}
+              title="Edit"
+              onClick={() => onOpenForm(rowData, "Edit")}
+            />
+          ) : (
+            rowData?.recOwner && (
+              <i
+                className="pi pi-file-edit"
+                style={{
+                  color: "slateblue",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                }}
+                title="Edit"
+                onClick={() => onOpenForm(rowData, "Edit")}
+              />
+            )
+          ))}
         {rowData?.isAttachment && (
           <i
             className="pi pi-image"
@@ -718,6 +736,12 @@ const MainComponent = (props: any) => {
         setDeleteData({
           Id: null,
           isPopup: false,
+        });
+        setShowToast({
+          severity: "success",
+          summary: "Success",
+          detail: `The task has been deleted successfully.`,
+          life: 3000,
         });
       })
       .catch((err) => {
@@ -1146,7 +1170,9 @@ const MainComponent = (props: any) => {
             >
               Delete Confirmation!
             </span>
-            <p style={{ marginTop: "5px" }}>
+            <p
+              style={{ marginTop: "5px", fontSize: "14px", fontWeight: "600" }}
+            >
               Are you sure want to delete this task?
             </p>
             <div
