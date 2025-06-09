@@ -2,23 +2,17 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
-// import { DataTable } from "primereact/datatable";
-// import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Paginator } from "primereact/paginator";
-
-// import { sp } from "@pnp/sp";
 import { Web } from "@pnp/sp/webs";
-// import { graph } from "@pnp/graph/presets/all";
 import { Toast } from "primereact/toast";
-
 import styles from "./TasksTracker.module.scss";
 import "./style.css";
 import "@pnp/graph/groups";
 import TaskForm from "./taskForm/TaskForm";
-// import { AvatarGroup } from "primereact/avatargroup";
 import { Avatar } from "primereact/avatar";
 import FilterSection from "./FilterSection/FilterSection";
 import {
@@ -30,8 +24,11 @@ import {
   TooltipDelay,
   TooltipHost,
 } from "@fluentui/react";
-import PreviewImages from "./PreviewImages/PreViewImages";
 import CustomLoader from "./CustomLoader/CustomLoader";
+import MediaPreview from "./MediaPreview/MediaPreview";
+import { Dialog } from "primereact/dialog";
+const deleteIcon = require("../../../images/delete.png");
+import "./commonStyle.css";
 
 interface taskDetails {
   Title: string;
@@ -61,11 +58,13 @@ interface formDataDetails {
   Title?: string;
   Description?: string;
   Notes?: string;
+  PreNotes?: string;
   CemeteryLocationId?: number;
   CemeteryLocation?: any;
   GroupName?: string;
   Priority?: any;
   Progress?: any;
+  PreProgress?: any;
   StartDate?: any;
   DueDate?: any;
   Id?: any;
@@ -74,16 +73,17 @@ interface formDataDetails {
   TaskType?: string;
   isValid?: boolean;
   recOwner?: boolean;
+  reOpenComments?: string;
 }
 
 const MainComponent = (props: any) => {
   // development site
-  // const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
+  const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
 
   // production site
-  const listWeb = Web(
-    "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
-  );
+  // const listWeb = Web(
+  //   "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
+  // );
 
   // const priorityOrderAsc = ["Low", "Medium", "High", "Critical"];
   // const priorityOrderDesc = [...priorityOrderAsc].reverse();
@@ -107,6 +107,10 @@ const MainComponent = (props: any) => {
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(9);
   const [expandCard, setExpandCard] = useState<any>(null);
+  const [deleteData, setDeleteData] = useState<any>({
+    Id: null,
+    isPopup: false,
+  });
 
   const createNewForm = () => {
     setFormData({
@@ -123,6 +127,9 @@ const MainComponent = (props: any) => {
       DueDate: "",
       Priority: "Medium",
       Progress: "Not started",
+      PreProgress: "",
+      Notes: "",
+      PreNotes: "",
       AssignedTo: [],
       AssignedBy: [],
       Id: 0,
@@ -142,6 +149,7 @@ const MainComponent = (props: any) => {
       DueDate: new Date(rowData?.DueDate),
       Priority: rowData?.Priority,
       Progress: rowData?.Progress,
+      PreProgress: rowData?.Progress,
       AssignedTo: rowData?.AssignedTo,
       AssignedBy: rowData?.AssignedBy,
       Id: rowData?.Id,
@@ -154,8 +162,10 @@ const MainComponent = (props: any) => {
       },
       GroupName: rowData?.GroupName,
       Notes: rowData?.Notes,
+      PreNotes: rowData?.Notes,
       isValid: true,
       recOwner: rowData?.recOwner,
+      reOpenComments: "",
     });
     setAllTasksList(masterTasksList);
     setOpenForm(true);
@@ -230,10 +240,10 @@ const MainComponent = (props: any) => {
 
       const fullFilter = `(${filterString}) and Progress ${
         isCompleted ? "eq" : "ne"
-      } 'Completed'`;
+      } 'Completed' and isDeleted ne 1`;
       const notCompleteFilter = `Progress ${
         isCompleted ? "eq" : "ne"
-      } 'Completed'`;
+      } 'Completed' and isDeleted ne 1`;
 
       const userBasedTasksList = await listWeb.lists
         .getByTitle("AllTasks")
@@ -302,36 +312,6 @@ const MainComponent = (props: any) => {
       console.error(error);
     }
   };
-
-  // Priority sort function
-
-  // const handlePrioritySortToggle = () => {
-  //   const nextState = (sortState?.Priority + 1) % 3;
-  //   setSortState({ ...sortState, Priority: nextState });
-
-  //   let sortedTasks = [...(allTasksList || [])];
-
-  //   if (nextState === 1) {
-  //     // Ascending priority
-  //     sortedTasks.sort(
-  //       (a, b) =>
-  //         priorityOrderAsc.indexOf(a.Priority) -
-  //         priorityOrderAsc.indexOf(b.Priority)
-  //     );
-  //   } else if (nextState === 2) {
-  //     // Descending priority
-  //     sortedTasks.sort(
-  //       (a, b) =>
-  //         priorityOrderDesc.indexOf(a.Priority) -
-  //         priorityOrderDesc.indexOf(b.Priority)
-  //     );
-  //   } else {
-  //     // Reset to original (by Id)
-  //     sortedTasks = sortedTasks.sort((a: any, b: any) => b.Id - a.Id);
-  //   }
-  //   setFirst(0);
-  //   setAllTasksList(sortedTasks);
-  // };
 
   const handleSortByDate = (Data: taskDetails[], type: string) => {
     const nextState =
@@ -412,6 +392,8 @@ const MainComponent = (props: any) => {
         return "#ff8080";
       case "in progress":
         return "#ffff00a3";
+      case "job completed":
+        return "#008000bf";
       case "completed":
         return "#008000bf";
       default:
@@ -426,46 +408,6 @@ const MainComponent = (props: any) => {
     const year = d.getFullYear();
     return `${month}-${day}-${year}`;
   };
-
-  // const descriptionBodyTemplate = (rowData: any) => {
-  //   return (
-  //     <div>
-  //       <p title={rowData?.Description} className="description-body">
-  //         {rowData?.Description}
-  //       </p>
-  //     </div>
-  //   );
-  // };
-
-  // const assignedToBodyTemplate = (rowData: any) => {
-  //   return (
-  //     <AvatarGroup style={{ marginLeft: "10px" }}>
-  //       {rowData?.AssignedTo?.map((person: any, index: number) => {
-  //         return (
-  //           <Avatar
-  //             key={index}
-  //             image={`/_layouts/15/userphoto.aspx?size=S&username=${person.secondaryText}`}
-  //             shape="circle"
-  //             size="normal"
-  //             style={{
-  //               margin: "0 !important",
-  //               border: "3px solid #fff",
-  //               width: "25px",
-  //               height: "25px",
-  //               marginLeft: rowData?.AssignedTo?.length > 1 ? "-10px" : "0",
-  //               // position: "absolute",
-  //               // left: `${positionLeft ? positionLeft * index : 0}px`,
-  //               // top: `${positionTop ? positionTop : 0}px`,
-  //               // zIndex: index,
-  //             }}
-  //             label={person.text}
-  //             title={person.text}
-  //           />
-  //         );
-  //       })}
-  //     </AvatarGroup>
-  //   );
-  // };
 
   const locationBodyTemplate = (location: any) => {
     const getBGCode = cemeteryListwithBg?.find(
@@ -623,10 +565,14 @@ const MainComponent = (props: any) => {
           padding: "2px 10px 5px 10px",
           borderRadius: "50px",
           color:
-            rowData?.Progress.toLowerCase() === "completed" ? "#fff" : "black",
+            rowData?.Progress.toLowerCase() === "completed" ||
+            rowData?.Progress.toLowerCase() === "job completed"
+              ? "#fff"
+              : "black",
           fontWeight: 500,
           display: "inline-block",
           fontSize: "13px",
+          textAlign: "center",
         }}
       >
         {rowData?.Progress}
@@ -655,7 +601,7 @@ const MainComponent = (props: any) => {
           className={`pi ${
             expandCard === rowData?.Id ? "pi-angle-up" : "pi-angle-down"
           } expandIcon`}
-          style={{ color: "slateblue", cursor: "pointer" }}
+          style={{ color: "slateblue", cursor: "pointer", fontSize: "14px" }}
           title="Expand/Collapse"
           onClick={() =>
             setExpandCard(expandCard === rowData?.Id ? null : rowData?.Id)
@@ -663,14 +609,14 @@ const MainComponent = (props: any) => {
         />
         <i
           className="pi pi-eye"
-          style={{ color: "slateblue", cursor: "pointer" }}
+          style={{ color: "slateblue", cursor: "pointer", fontSize: "14px" }}
           title="View"
           onClick={() => onOpenForm(rowData, "View")}
         />
         {rowData?.Progress.toLowerCase() !== "completed" && (
           <i
             className="pi pi-file-edit"
-            style={{ color: "slateblue", cursor: "pointer" }}
+            style={{ color: "slateblue", cursor: "pointer", fontSize: "14px" }}
             title="Edit"
             onClick={() => onOpenForm(rowData, "Edit")}
           />
@@ -678,9 +624,24 @@ const MainComponent = (props: any) => {
         {rowData?.isAttachment && (
           <i
             className="pi pi-image"
-            style={{ color: "slateblue", cursor: "pointer" }}
+            style={{ color: "slateblue", cursor: "pointer", fontSize: "14px" }}
             title="Attachments"
             onClick={() => getAttachments(rowData?.Id)}
+          />
+        )}
+        {(isAdmin || rowData?.recOwner) && (
+          <img
+            src={deleteIcon}
+            alt="delete"
+            width={13}
+            height={13}
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              setDeleteData({
+                Id: rowData?.Id,
+                isPopup: true,
+              });
+            }}
           />
         )}
       </div>
@@ -737,6 +698,33 @@ const MainComponent = (props: any) => {
       });
   };
 
+  const deleteTaskFunction = async () => {
+    const payload = {
+      isDeleted: true,
+    };
+    await listWeb.lists
+      .getByTitle("AllTasks")
+      .items.getById(deleteData?.Id)
+      .update(payload)
+      .then((res: any) => {
+        const masterUpdatedList = masterTasksList?.filter(
+          (obj, index) => obj?.Id !== deleteData?.Id
+        );
+        setMasterTasksList?.(masterUpdatedList);
+        const tempTasksList = allTasksList?.filter(
+          (obj, index) => obj?.Id !== deleteData?.Id
+        );
+        setAllTasksList?.(tempTasksList);
+        setDeleteData({
+          Id: null,
+          isPopup: false,
+        });
+      })
+      .catch((err) => {
+        console.log("Error : ", err);
+      });
+  };
+
   return (
     <div>
       {openForm ? (
@@ -754,10 +742,15 @@ const MainComponent = (props: any) => {
           <CustomLoader />
         </div>
       ) : imagePreview ? (
-        <PreviewImages
-          imagesData={images}
-          imageIndex={1}
-          setImagePreview={setImagePreview}
+        // <PreviewImages
+        //   imagesData={images}
+        //   imageIndex={1}
+        //   setImagePreview={setImagePreview}
+        // />
+        <MediaPreview
+          mediaList={images}
+          initialIndex={0}
+          onClose={setImagePreview}
         />
       ) : (
         <div className="taskTableContainer">
@@ -775,19 +768,19 @@ const MainComponent = (props: any) => {
               </span>
             </div>
             <div style={{ display: "flex", gap: "10px" }}>
-              {isAdmin && (
-                <Button
-                  style={{
-                    backgroundColor: isCompleted ? "#b96859" : "#68b97b",
-                    border: `1px solid ${isCompleted ? "#b96859" : "#68b97b"}`,
-                    fontSize: "12px",
-                  }}
-                  severity="success"
-                  size="small"
-                  label={`${isCompleted ? "Ongoing Tasks" : "Completed Tasks"}`}
-                  onClick={() => getUserBasedGroups(!isCompleted)}
-                />
-              )}
+              {/* {isAdmin && ( */}
+              <Button
+                style={{
+                  backgroundColor: isCompleted ? "#b96859" : "#68b97b",
+                  border: `1px solid ${isCompleted ? "#b96859" : "#68b97b"}`,
+                  fontSize: "12px",
+                }}
+                severity="success"
+                size="small"
+                label={`${isCompleted ? "Ongoing Tasks" : "Completed Tasks"}`}
+                onClick={() => getUserBasedGroups(!isCompleted)}
+              />
+              {/* // )} */}
               {!isCompleted && (
                 <Button
                   style={{ fontSize: "12px" }}
@@ -840,6 +833,7 @@ const MainComponent = (props: any) => {
                   <p>Assigned to</p>
                 </div>
                 <div
+                  className={styles.hidePriority}
                   style={{ width: "10%", cursor: "pointer" }}
                   // onClick={() => handlePrioritySortToggle()}
                 >
@@ -859,7 +853,7 @@ const MainComponent = (props: any) => {
                   <p>Progress</p>
                 </div>
                 <div
-                  // className={styles.progressColumn}
+                  className={styles.priorityColumn}
                   style={{ width: "10%", cursor: "pointer" }}
                   onClick={() => handleSortByDate(allTasksList || [], "click")}
                 >
@@ -928,7 +922,10 @@ const MainComponent = (props: any) => {
                     >
                       {usersBodyTemplate(rowData?.AssignedTo)}
                     </div>
-                    <div style={{ width: "10%", padding: "10px 15px" }}>
+                    <div
+                      className={styles.hidePriority}
+                      style={{ width: "10%", padding: "10px 15px" }}
+                    >
                       {priorityBodyTemplate(rowData)}
                     </div>
                     <div
@@ -938,6 +935,7 @@ const MainComponent = (props: any) => {
                       {progressBodyTemplate(rowData)}
                     </div>
                     <div
+                      className={styles.priorityColumn}
                       // className={styles.progressColumn}
                       style={{ width: "10%", padding: "10px 15px" }}
                     >
@@ -955,66 +953,6 @@ const MainComponent = (props: any) => {
                   </div>
                 ))}
               </div>
-              {/* <DataTable
-                className="taskTable"
-                value={showTasksList}
-                tableStyle={{ minWidth: "50rem" }}
-              >
-                <Column
-                  style={{ width: "20%", fontWeight: "500" }}
-                  field="Title"
-                  header="Title"
-                ></Column>
-                <Column
-                  style={{
-                    width: "20%",
-                  }}
-                  field="Description"
-                  header="Description"
-                  body={descriptionBodyTemplate}
-                ></Column>
-
-                <Column
-                  style={{
-                    width: "15%",
-                  }}
-                  field="CemeteryLocation"
-                  header="Cemetery Location"
-                  // body={descriptionBodyTemplate}
-                ></Column>
-                <Column
-                  style={{
-                    width: "10%",
-                  }}
-                  field="AssignTo"
-                  header="Assign To"
-                  body={assignToBodyTemplate}
-                ></Column>
-                <Column
-                  style={{ width: "10%" }}
-                  field="Priority"
-                  header="Priority"
-                  body={priorityBodyTemplate}
-                ></Column>
-                <Column
-                  style={{ width: "10%" }}
-                  field="Progress"
-                  header="Progress"
-                  body={progressBodyTemplate}
-                ></Column>
-                <Column
-                  style={{ width: "10%" }}
-                  field="DueDate"
-                  header="Due date"
-                  body={dueDateBodyTemplate}
-                ></Column>
-                <Column
-                  style={{ width: "5%" }}
-                  field="Id"
-                  header=""
-                  body={actionBodyTemplate}
-                ></Column>
-              </DataTable> */}
             </div>
             {(allTasksList?.length ?? 0) > 9 && (
               <Paginator
@@ -1188,6 +1126,56 @@ const MainComponent = (props: any) => {
           )}
         </div>
       )}
+      <div>
+        <Dialog
+          className="deletion_popup_section"
+          header=""
+          visible={deleteData?.isPopup}
+          style={{ width: "30%" }}
+          onHide={() => {
+            if (!deleteData?.isPopup) return;
+            setDeleteData({
+              Id: null,
+              ispopup: false,
+            });
+          }}
+        >
+          <div style={{ padding: "10px 20px 20px 20px", textAlign: "center" }}>
+            <span
+              style={{ fontSize: "20px", color: "#8f6868", fontWeight: "500" }}
+            >
+              Delete Confirmation!
+            </span>
+            <p style={{ marginTop: "5px" }}>
+              Are you sure want to delete this task?
+            </p>
+            <div
+              style={{ display: "flex", justifyContent: "center", gap: "10px" }}
+            >
+              <Button
+                style={{ fontSize: "12px", padding: "5px 25px" }}
+                severity="danger"
+                size="small"
+                label="No"
+                outlined
+                onClick={() => {
+                  setDeleteData({
+                    Id: null,
+                    ispopup: false,
+                  });
+                }}
+              />
+              <Button
+                style={{ fontSize: "12px", padding: "5px 25px" }}
+                severity="secondary"
+                size="small"
+                label="Yes"
+                onClick={deleteTaskFunction}
+              />
+            </div>
+          </div>
+        </Dialog>
+      </div>
     </div>
   );
 };

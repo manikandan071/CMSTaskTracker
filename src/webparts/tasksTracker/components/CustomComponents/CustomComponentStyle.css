@@ -1,0 +1,54 @@
+.custom_persona {
+    width: 25px;
+    height: 25px;
+    background-color: #4d51a6;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 600;
+}
+.custom_all_person {
+    visibility: visible;
+}
+.user-selector-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+.assign_user_body .ms-Persona-imageArea{
+   display: flex !important;
+   align-items: center !important;
+}
+
+.user-name {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px; 
+}
+
+.location-badge-wrapper {
+    width: 100%;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.location-badge {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #fff;
+    padding: 5px 10px;
+    font-weight: 500;
+    border-radius: 5px;
+    font-size: 13px; }

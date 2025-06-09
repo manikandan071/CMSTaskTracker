@@ -1,0 +1,100 @@
+
+/* .custom-data-table .p-datatable-wrapper{
+    min-height: 60vh !important;
+} */
+.p-datatable-wrapper{
+    min-height: 60vh !important;
+    background-color: #fff;
+ }
+.custom-data-table .p-datatable thead>tr>th {
+    color: #fff;
+    background-color: #6e777f;
+    border: none !important;   
+    font-size: 14px !important; 
+    padding: 12px 15px;
+}
+.custom-data-table .p-datatable-tbody tr:hover{
+    background-color: #eee9ea74;
+}
+.custom-data-table .p-datatable-tbody tr td{
+    padding: 12px 15px;
+}
+.custom-data-table .p-datatable thead>tr>th:hover {
+    color: #60553b !important;
+    background-color: #b3abac5c!important;
+    border: none !important;    
+}
+
+.custom-data-table .p-datatable thead>tr>th svg {
+    width: 12px;
+}
+
+.custom-data-table .p-datatable thead>tr>th:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.custom-data-table .p-datatable thead>tr>th:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.custom-data-table .p-datatable tbody>tr:first-child>td {
+    border-width: 0px !important; 
+}
+
+.custom-data-table .p-datatable tbody tr td {
+    border: 1px solid #6e777f26;
+    border-width: 1px 0px 0px 0px !important;
+}
+
+.custom-data-table .p-paginator-current{
+    color: #6e777f;
+    font-size: 14px;
+    border: none;
+    background-color: transparent;
+}
+
+.custom-data-table .p-paginator{
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    padding: 15px 0px;
+    gap: 5px;
+    background-color: transparent;
+}
+.custom-data-table .p-paginator .p-paginator-pages {
+    display: flex;
+    gap: 5px;
+}
+.custom-data-table .p-paginator .p-paginator-pages .p-paginator-page{
+    color: #6e777f;
+}
+.custom-data-table .p-paginator-bottom .p-link:hover{
+    background-color: #6e777f;
+}
+.custom-data-table .p-paginator .p-paginator-pages .p-highlight{
+    color: #fff;
+    background-color: #6e777f;
+    border-color: #6e777f;
+}
+.custom-data-table .p-paginator button{
+    border-radius: 50%;
+}
+.custom-data-table .p-paginator-bottom .p-paginator-first,
+.custom-data-table .p-paginator-bottom .p-paginator-prev,
+.custom-data-table .p-paginator-bottom .p-paginator-next,
+.custom-data-table .p-paginator-bottom .p-paginator-last{
+    color: #6e777f;
+    border: none;
+}   
+.custom-data-table .p-paginator-bottom .p-disabled{
+    color: #cccccc;
+    border: none;
+}
+.p-datatable-emptymessage td{
+    font-size: 14px;
+    color: var(--basic-font-color);
+    text-align: center;
+    font-weight: 600;
+}

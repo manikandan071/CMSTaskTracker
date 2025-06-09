@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from "react";
 import { Carousel } from "primereact/carousel";
 import styles from "./PreViewImages.module.scss";
+import PdfViewer from "../PDFPreview/PdfViewer";
 
 interface IPreviewImageProps {
   imagesData: any;
@@ -22,17 +23,17 @@ const PreviewImages: React.FC<IPreviewImageProps> = ({
   const responsiveOptions = [
     {
       breakpoint: "1400px",
-      numVisible: 2,
+      numVisible: 1,
       numScroll: 1,
     },
     {
       breakpoint: "1199px",
-      numVisible: 3,
+      numVisible: 1,
       numScroll: 1,
     },
     {
       breakpoint: "770px",
-      numVisible: 2,
+      numVisible: 1,
       numScroll: 1,
     },
     {
@@ -46,12 +47,53 @@ const PreviewImages: React.FC<IPreviewImageProps> = ({
     setImages(imagesData);
   }, []);
 
-  const productTemplate = (image: any) => {
-    return (
-      <div className={styles.imageSlide}>
-        <img src={image?.url} alt={image.name} />
-      </div>
-    );
+  // const productTemplate = (image: any) => {
+  //   console.log(image);
+
+  //   return (
+  //     <div className={styles.imageSlide}>
+  //       <img src={image?.url} alt={image.name} />
+  //     </div>
+  //   );
+  // };
+
+  const productTemplate = (file: any) => {
+    console.log(file);
+    const url = file?.url;
+    const name = file?.name?.toLowerCase();
+
+    if (
+      url &&
+      (name.endsWith(".jpg") ||
+        name.endsWith(".jpeg") ||
+        name.endsWith(".png") ||
+        name.endsWith(".gif"))
+    ) {
+      return (
+        <div className={styles.imageSlide}>
+          <img src={url} alt={file.name} />
+        </div>
+      );
+    } else if (url && name.endsWith(".pdf")) {
+      // Default preview for DOCX or unsupported types
+      return (
+        <div className={styles.imageSlide}>
+          {/* <p style={{ textAlign: "center", color: "#fff" }}>
+            <strong>{file.name}</strong> <br />
+            <span style={{ fontSize: "12px" }}>
+              Preview not available for this file type.
+            </span>
+          </p> */}
+          <PdfViewer pdfUrl={url} />
+        </div>
+      );
+    } else {
+      return (
+        <div className={styles.imageSlide}>
+          <p style={{ textAlign: "center", color: "#fff" }}>Loading...</p>
+        </div>
+      );
+    }
   };
 
   return (
@@ -70,8 +112,8 @@ const PreviewImages: React.FC<IPreviewImageProps> = ({
         responsiveOptions={responsiveOptions}
         itemTemplate={productTemplate}
         page={imageIndex}
-        circular
-        autoplayInterval={4000}
+        // circular
+        // autoplayInterval={400000}
         className={styles.fullscreenCarousel}
       />
     </div>

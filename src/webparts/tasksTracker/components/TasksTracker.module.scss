@@ -217,6 +217,13 @@ $tablet-max: 1024px;
         display: none !important;
     }
 }
+@media screen and (min-width: 770px) and (max-width: 1380px) {
+    .tabletView {
+        display: none !important;
+    }
+}
+
+
 
 @media screen and (min-width: 770px) and (max-width: 1380px) {
     .customTableHeader {
@@ -226,7 +233,19 @@ $tablet-max: 1024px;
         font-size: 13px;
     }
     .progressColumn {
+        width: 13% !important;
+    }
+}
+@media screen and (min-width: 770px) and (max-width: 1000px) {
+    .hidePriority {
+        display: none !important;
+    }
+
+    .progressColumn {
         width: 15% !important;
+    }
+    .priorityColumn{
+        width: 13% !important;
     }
 }
 

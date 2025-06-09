@@ -300,3 +300,14 @@
 .p-datepicker-calendar tbody tr td .p-disabled {
     color: lightgray !important;
 }
+
+/* panel styles */
+
+.panelContainer{
+    height: 100%;
+    overflow: auto;
+}
+
+#re_open_comments_dialog .p-dialog-footer{
+    background-color: #e6e2f2;
+}
