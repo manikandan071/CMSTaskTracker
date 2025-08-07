@@ -78,12 +78,12 @@ interface formDataDetails {
 
 const MainComponent = (props: any) => {
   // development site
-  const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
+  // const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
 
   // production site
-  // const listWeb = Web(
-  //   "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
-  // );
+  const listWeb = Web(
+    "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
+  );
 
   // const priorityOrderAsc = ["Low", "Medium", "High", "Critical"];
   // const priorityOrderDesc = [...priorityOrderAsc].reverse();
@@ -942,7 +942,7 @@ const MainComponent = (props: any) => {
                     </div>
                     <div
                       className={styles.progressColumn}
-                      style={{ width: "10%", padding: "10px 15px" }}
+                      style={{ width: "10%", padding: "10px 10px" }}
                     >
                       {usersBodyTemplate(rowData?.AssignedTo)}
                     </div>
@@ -954,7 +954,7 @@ const MainComponent = (props: any) => {
                     </div>
                     <div
                       className={styles.progressColumn}
-                      style={{ width: "10%", padding: "10px 15px" }}
+                      style={{ width: "10%", padding: "10px 10px" }}
                     >
                       {progressBodyTemplate(rowData)}
                     </div>

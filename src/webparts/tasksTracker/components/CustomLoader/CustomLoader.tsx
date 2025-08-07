@@ -6,16 +6,17 @@ import * as React from "react";
 import "./CustomLoader.css";
 
 const CustomLoader: React.FC<any> = () => {
-  return (
-    <div className="loader">
-      <div className="dot dot1" />
-      <div className="dot dot2" />
-      <div className="dot dot3" />
-      <div className="dot dot4" />
-      <div className="dot dot5" />
-      <div className="dot dot6" />
-    </div>
-  );
+  // return (
+  //   <div className="loader">
+  //     <div className="dot dot1" />
+  //     <div className="dot dot2" />
+  //     <div className="dot dot3" />
+  //     <div className="dot dot4" />
+  //     <div className="dot dot5" />
+  //     <div className="dot dot6" />
+  //   </div>
+  // );
+  return <span className="loader"></span>;
 };
 
 export default CustomLoader;

@@ -93,12 +93,12 @@ const TaskForm: React.FC<TaskFormProps> = ({
   setShowToast,
 }) => {
   // development site
-  const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
+  // const listWeb = Web("https://chandrudemo.sharepoint.com/sites/TechnorucsV1");
 
   // production site
-  // const listWeb = Web(
-  //   "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
-  // );
+  const listWeb = Web(
+    "https://libitinaco.sharepoint.com/sites/CemeterySociety2"
+  );
   const screenType = useScreenSize();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const webcamRef = useRef<Webcam>(null);
@@ -135,7 +135,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
   >([]);
   const [images, setImages] = useState<any[]>([]);
   const [isInTeams, setIsInTeams] = useState(true);
-  console.log("allNotes", allNotes, formData);
 
   const onFilterChanged = (filterText: string) => {
     return filterText
@@ -363,6 +362,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
     isNew: boolean,
     tempFormData: formDataDetails
   ) => {
+    debugger;
     const isValid = formValidation();
     if (!isValid) {
       return;
@@ -456,8 +456,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
           life: 3000,
         });
       } else {
-        console.log("form submit", tempFormData);
-
         listWeb.lists
           .getByTitle("AllTasks")
           .items.getById(tempFormData?.Id)
@@ -622,7 +620,6 @@ const TaskForm: React.FC<TaskFormProps> = ({
           };
           tempArray.push(tempObj);
         });
-        console.log("tempArray", tempArray);
 
         setAllNotes([...tempArray].reverse());
       })
@@ -965,7 +962,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 </label>
                 <InputTextarea
                   title={formData?.Description}
-                  disabled={
+                  readOnly={
                     formData?.TaskType === "View" || !formData?.recOwner
                       ? true
                       : false
@@ -1321,9 +1318,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
                             style={{
                               cursor:
                                 formData?.TaskType !== "View" &&
-                                (formData?.Progress?.toLowerCase() !==
-                                  "job completed" ||
-                                  !formData?.recOwner)
+                                formData?.Progress?.toLowerCase() !==
+                                  "completed" &&
+                                formData?.PreProgress?.toLowerCase() !==
+                                  "job completed"
                                   ? "pointer"
                                   : "not-allowed",
                               backgroundColor: getProgressBGColor(
@@ -1366,9 +1364,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
                             onClick={() =>
                               formData?.TaskType !== "View" &&
                               formData?.TaskType !== "View" &&
-                              (formData?.Progress?.toLowerCase() !==
-                                "job completed" ||
-                                !formData?.recOwner) &&
+                              formData?.Progress?.toLowerCase() !==
+                                "completed" &&
+                              formData?.PreProgress?.toLowerCase() !==
+                                "job completed" &&
                               formOnChange(option?.key, "Progress")
                             }
                           >
@@ -1441,7 +1440,8 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 </label>
                 <InputTextarea
                   title={formData?.Notes}
-                  disabled={formData?.TaskType === "View" ? true : false}
+                  readOnly={formData?.TaskType === "View" ? true : false}
+                  // disabled={formData?.TaskType === "View" ? true : false}
                   autoResize={false}
                   value={formData?.Notes}
                   onChange={(e) =>
@@ -1454,6 +1454,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
                   placeholder="Enter here"
                   rows={formData?.TaskType === "New" ? 5 : 6}
                   cols={30}
+                  style={{
+                    resize: "none",
+                    overflow: "auto",
+                  }}
                 />
                 {allNotes && allNotes?.length !== 0 && (
                   <span
@@ -1943,7 +1947,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
         >
           <InputTextarea
             title={formData?.reOpenComments}
-            disabled={formData?.TaskType === "View" ? true : false}
+            readOnly={formData?.TaskType === "View" ? true : false}
             autoResize={true}
             value={formData?.reOpenComments}
             onChange={(e) =>

@@ -89,6 +89,9 @@
 .p-autocomplete-panel .p-autocomplete-items {
     padding: 0px !important;
 }
+.inputsection{
+    flex-direction: column;
+}
 
 .inputsection .p-inputtext,
 .inputsection .p-dropdown,

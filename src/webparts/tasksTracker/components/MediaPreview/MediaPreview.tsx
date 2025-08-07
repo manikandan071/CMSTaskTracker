@@ -24,8 +24,6 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
   initialIndex = 0,
   onClose,
 }) => {
-  console.log("mediaList", mediaList);
-
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
   const [isLoader, setIsLoader] = useState<boolean>(false);
   const [convertedImageUrl, setConvertedImageUrl] = useState<string | null>(

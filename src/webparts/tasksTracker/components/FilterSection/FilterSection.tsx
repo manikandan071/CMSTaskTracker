@@ -65,6 +65,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     { name: "All", code: "All" },
     { name: "Not started", code: "Not started" },
     { name: "In progress", code: "In progress" },
+    { name: "Job completed", code: "In progress" },
   ];
   const [searchQueries, setSearchQueries] = useState<any>({
     text: "",
@@ -239,7 +240,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               options={locationList}
               optionLabel="name"
               placeholder="Location"
-              editable
+              // filter
               className="dropdown"
             />
 
